@@ -366,22 +366,42 @@ class RotatingAnodeSimulation:
         """
         Configure time stepping for the simulation.
         
-        For now, use simple uniform time stepping for debugging.
-        Complex event-based stepping can be added later.
+        Generates explicit output times to capture beam on/off transitions
+        within each rotation period.
         """
         print("    Configuring time stepping...")
         
-        # For debugging: just use uniform coarse time steps
-        # Skip complex event system until basic simulation works
         n_periods = N_PERIODS_MIN
-        total_time = n_periods * PERIOD
         
-        # Use simple uniform output times (coarse for debugging)
-        dt_output = PERIOD / 10  # 10 points per period for debugging
-        times_str = f"range(0, {dt_output}, {total_time})"
+        # Generate explicit output times to capture beam on/off transitions
+        # We need: start of beam, during beam, end of beam, and a few points during cooling
+        output_times = []
+        for n in range(n_periods):
+            t_start = n * PERIOD
+            t_on_end = t_start + self.beam_on_time
+            t_period_end = (n + 1) * PERIOD
+            
+            # During beam-on: 5 points (captures heating)
+            for i in range(5):
+                output_times.append(t_start + i * self.beam_on_time / 4)
+            output_times.append(t_on_end)  # Exact end of beam
+            
+            # During beam-off: 5 points (captures cooling)
+            t_off_duration = PERIOD - self.beam_on_time
+            for i in range(1, 5):
+                output_times.append(t_on_end + i * t_off_duration / 4)
+        
+        # Add final time
+        output_times.append(n_periods * PERIOD)
+        
+        # Remove duplicates and sort
+        output_times = sorted(set(output_times))
+        
+        # Convert to string for COMSOL
+        times_str = " ".join([f"{t:.9f}" for t in output_times])
         sol.feature("t1").set("tlist", times_str)
         
-        print(f"    Time stepping: {n_periods} periods, dt={dt_output*1e6:.1f} μs")
+        print(f"    Time stepping: {n_periods} periods, {len(output_times)} output points")
         
     def solve(self) -> None:
         """Run the simulation."""
