@@ -159,25 +159,22 @@ class RotatingAnodeSimulation:
         # Create component
         model.component().create("comp1", True)
         
-        # Create 3D geometry
+        # Create 3D geometry with union action (creates single domain from overlapping objects)
         geom = model.component("comp1").geom().create("geom1", 3)
         
         # Substrate block (bottom)
-        geom.create("substrate", "Block")
-        geom.feature("substrate").set("size", ["L_sub", "W_sub", "H_sub"])
-        geom.feature("substrate").set("pos", ["-L_sub/2", "-W_sub/2", "0"])
-        geom.feature("substrate").setIndex("layername", "Substrate", 0)
+        blk1 = geom.create("substrate", "Block")
+        blk1.set("size", ["L_sub", "W_sub", "H_sub"])
+        blk1.set("pos", ["-L_sub/2", "-W_sub/2", "0"])
+        blk1.label("Substrate")
         
         # Anode layer (on top of substrate)
-        geom.create("anode", "Block")
-        geom.feature("anode").set("size", ["L_sub", "W_sub", "t_anode"])
-        geom.feature("anode").set("pos", ["-L_sub/2", "-W_sub/2", "H_sub"])
-        geom.feature("anode").setIndex("layername", "Anode", 0)
+        blk2 = geom.create("anode", "Block")
+        blk2.set("size", ["L_sub", "W_sub", "t_anode"])
+        blk2.set("pos", ["-L_sub/2", "-W_sub/2", "H_sub"])
+        blk2.label("Anode")
         
-        # Form union to merge and share boundaries
-        geom.create("fin", "FormUnion")
-        
-        # Build geometry
+        # Run and finalize geometry (auto-creates union/assembly)
         geom.run()
         
     def _create_materials(self) -> None:
