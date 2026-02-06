@@ -399,8 +399,11 @@ class RotatingAnodeSimulation:
         print("    Creating discrete state 'beam_state'...")
         ds = events.create("ds1", "DiscreteStates")
         ds.label("Beam State")
-        ds.set("dim", "1")  # One-dimensional state
-        ds.set("initialValue", "1")  # Start with beam on (first period begins with beam)
+        # DiscreteStates uses table format: name in first column, initial value (u0) in second
+        # Set the first row with index 0
+        ds.setIndex("dimExpr", "1", 0)  # Number of states = 1
+        ds.setIndex("name", "beam_state", 0)  # State name
+        ds.setIndex("u0", "1", 0)  # Initial value = 1 (beam on at t=0)
         
         # Get timing parameters for debug output
         n_periods = N_PERIODS_MIN
