@@ -94,7 +94,7 @@ class RotatingAnodeSimulation:
         """Connect to COMSOL server."""
         print("Starting COMSOL client...")
         self.client = mph.start()
-        print(f"Connected to COMSOL {self.client.version()}")
+        print(f"Connected to COMSOL {self.client.version}")
         
     def create_model(self) -> None:
         """Create the COMSOL model with all physics."""
