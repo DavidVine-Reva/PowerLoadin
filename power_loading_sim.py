@@ -269,25 +269,26 @@ class RotatingAnodeSimulation:
         """
         Build the volumetric heat source expression for COMSOL.
         
-        Q(x,y,z,t) = P0 * G_xy(x - x_beam(t), y) * G_z(z_local) * pulse(t)
+        Q(x,y,z,t) = P0 * G_xy(x - x_beam(t), y) * G_z(z_local) * beam_state
         
         where:
         - G_xy is 2D Gaussian
         - G_z is Gruen depth profile
         - x_beam(t) moves from -L_track/2 to L_track/2
-        - pulse(t) is 1 during beam-on, 0 during beam-off
+        - beam_state is discrete state (1 during beam-on, 0 during beam-off)
         - z_local = (H_sub + t_anode) - z (depth from anode surface)
+        
+        Using beam_state (discrete variable) instead of a conditional ensures
+        the solver properly handles state transitions via events.
         """
         
         # Time within current period
         t_mod = "mod(t, T_period)"
         
         # Beam x position (linear motion during beam-on time)
-        # x_beam = -L_track/2 + (t_mod / t_on) * L_track  for t_mod < t_on
+        # During beam-on, beam moves from -L_track/2 to +L_track/2
+        # Use beam_state to freeze position when beam is off
         x_beam = f"(-L_track/2 + ({t_mod}/t_on)*L_track)"
-        
-        # Pulse function: 1 if t_mod < t_on, else 0
-        pulse = f"({t_mod} < t_on)"
         
         # 2D Gaussian in x and y
         # G_xy = (1 / (2*pi*sigma_x*sigma_y)) * exp(-((x-x_beam)^2/(2*sigma_x^2) + y^2/(2*sigma_y^2)))
@@ -301,8 +302,9 @@ class RotatingAnodeSimulation:
         gauss_z = f"norm_z*({z_local}/z_peak)*exp(-(({z_local}-z_peak)^2)/(2*sigma_z^2))"
         valid_z = f"(({z_local} > 0) * ({z_local} < R_gruen))"
         
-        # Complete heat source expression
-        Q_expr = f"P0 * {gauss_xy} * {gauss_z} * {valid_z} * {pulse}"
+        # Complete heat source expression using beam_state discrete variable
+        # beam_state is controlled by events (1=on, 0=off)
+        Q_expr = f"P0 * {gauss_xy} * {gauss_z} * {valid_z} * beam_state"
         
         return Q_expr
         
@@ -378,44 +380,103 @@ class RotatingAnodeSimulation:
         
     def _add_time_step_events(self, sol) -> None:
         """
-        Configure time stepping for the simulation.
+        Configure time stepping with COMSOL discrete events.
         
-        Generates explicit output times to capture beam on/off transitions
-        within each rotation period.
+        Creates an Events interface with discrete state for beam on/off,
+        and explicit events at beam transition times.
         """
-        print("    Configuring time stepping...")
+        print("    Configuring time stepping with events...")
         
+        model = self.java
+        comp = model.component("comp1")
+        
+        # Create Events physics interface for beam state control
+        print("    Creating Events interface...")
+        events = comp.physics().create("ev", "Events", "geom1")
+        events.label("Beam State Control")
+        
+        # Create discrete state for beam on/off (0 = off, 1 = on)
+        print("    Creating discrete state 'beam_state'...")
+        ds = events.create("ds1", "DiscreteStates")
+        ds.label("Beam State")
+        ds.set("dim", "1")  # One-dimensional state
+        ds.set("initialValue", "1")  # Start with beam on (first period begins with beam)
+        
+        # Get timing parameters for debug output
         n_periods = N_PERIODS_MIN
+        t_on = self.beam_on_time
+        t_period = PERIOD
         
-        # Generate explicit output times to capture beam on/off transitions
-        # We need: start of beam, during beam, end of beam, and a few points during cooling
+        print(f"      Period: {t_period*1e6:.1f} μs")
+        print(f"      Beam on time: {t_on*1e6:.1f} μs")
+        print(f"      Beam off time: {(t_period - t_on)*1e6:.1f} μs")
+        print(f"      Number of periods: {n_periods}")
+        
+        # Create explicit events for beam on and beam off times
+        # Build list of event times
+        event_on_times = []
+        event_off_times = []
+        for n in range(n_periods):
+            t_beam_on = n * t_period
+            t_beam_off = n * t_period + t_on
+            if t_beam_on > 0:  # Skip t=0 since beam starts on
+                event_on_times.append(t_beam_on)
+            event_off_times.append(t_beam_off)
+        
+        print(f"    Creating {len(event_off_times)} beam-off events...")
+        # Beam OFF events - set beam_state to 0
+        for i, t_off in enumerate(event_off_times):
+            ev_off = events.create(f"exev_off{i}", "ExplicitEvent")
+            ev_off.label(f"Beam Off at t={t_off*1e6:.1f}μs")
+            ev_off.set("start", f"{t_off}")
+            ev_off.set("period", "0")  # One-shot, no repeat
+            # Reinitialize beam_state to 0 (off)
+            ev_off.setIndex("reinit", "beam_state", 0)
+            ev_off.setIndex("reinitexpr", "0", 0)
+        
+        if event_on_times:
+            print(f"    Creating {len(event_on_times)} beam-on events...")
+            # Beam ON events - set beam_state to 1
+            for i, t_on_ev in enumerate(event_on_times):
+                ev_on = events.create(f"exev_on{i}", "ExplicitEvent")
+                ev_on.label(f"Beam On at t={t_on_ev*1e6:.1f}μs")
+                ev_on.set("start", f"{t_on_ev}")
+                ev_on.set("period", "0")  # One-shot
+                ev_on.setIndex("reinit", "beam_state", 0)
+                ev_on.setIndex("reinitexpr", "1", 0)
+        
+        # Generate output times to capture beam on/off transitions
         output_times = []
         for n in range(n_periods):
-            t_start = n * PERIOD
-            t_on_end = t_start + self.beam_on_time
-            t_period_end = (n + 1) * PERIOD
+            t_start = n * t_period
+            t_on_end = t_start + t_on
             
-            # During beam-on: 5 points (captures heating)
-            for i in range(5):
-                output_times.append(t_start + i * self.beam_on_time / 4)
-            output_times.append(t_on_end)  # Exact end of beam
+            # During beam-on: key points
+            output_times.append(t_start)
+            output_times.append(t_start + t_on * 0.5)
+            output_times.append(t_on_end - 1e-9)  # Just before beam off
+            output_times.append(t_on_end)  # Exact beam off time
+            output_times.append(t_on_end + 1e-9)  # Just after beam off
             
-            # During beam-off: 5 points (captures cooling)
-            t_off_duration = PERIOD - self.beam_on_time
-            for i in range(1, 5):
-                output_times.append(t_on_end + i * t_off_duration / 4)
+            # During beam-off: key points
+            t_off_duration = t_period - t_on
+            output_times.append(t_on_end + t_off_duration * 0.5)
         
         # Add final time
-        output_times.append(n_periods * PERIOD)
-        
-        # Remove duplicates and sort
+        output_times.append(n_periods * t_period)
         output_times = sorted(set(output_times))
         
-        # Convert to string for COMSOL
-        times_str = " ".join([f"{t:.9f}" for t in output_times])
+        # Set output times
+        times_str = " ".join([f"{t:.12f}" for t in output_times])
         sol.feature("t1").set("tlist", times_str)
         
+        # Configure solver to store solutions at events
+        print("    Configuring solver for event handling...")
+        sol.feature("t1").set("eventtol", "1e-6")
+        sol.feature("t1").set("eventout", "true")  # Store solutions at events
+        
         print(f"    Time stepping: {n_periods} periods, {len(output_times)} output points")
+        print(f"    Total simulation time: {n_periods * t_period * 1e3:.2f} ms")
         
     def solve(self) -> None:
         """Run the simulation."""
@@ -424,25 +485,73 @@ class RotatingAnodeSimulation:
         print("Simulation complete.")
         
     def get_results(self) -> Dict[str, Any]:
-        """Extract results from the simulation."""
+        """Extract results from the simulation including temperature history."""
         print("Extracting results...")
         
         results = {}
         
         try:
-            # Get maximum temperature from the simulation at last time step
-            # outer=-1 means last time step, inner not needed for scalar result
-            T_data = self.model.evaluate('T', unit='K')
-            # T_data is typically array - get max from last solution
-            if hasattr(T_data, '__len__') and len(T_data) > 0:
-                T_max = float(max(T_data.flatten())) if hasattr(T_data, 'flatten') else float(max(T_data))
+            # Get time values from the solution dataset
+            model = self.java
+            
+            # Get the dataset with solutions
+            data = model.result().dataset("dset1")
+            
+            # Use mph to evaluate at all time steps
+            # First, get all output times
+            print("  Getting time points from solution...")
+            
+            # Evaluate a simple expression to get the time structure
+            # mph's evaluate returns data for all time steps by default
+            T_all = self.model.evaluate('T', unit='K')
+            
+            # Get the solution times from the solver
+            sol = model.sol("sol1")
+            times_java = sol.getPVals()
+            if hasattr(times_java, '__iter__'):
+                times = [float(t) for t in times_java]
             else:
-                T_max = float(T_data) if T_data else 0
-            print(f"  Max temperature: {T_max:.1f} K ({T_max - 273.15:.1f} °C)")
-            results['T_max'] = T_max
+                times = [float(times_java)]
+            
+            print(f"  Number of time points: {len(times)}")
+            print(f"  Time range: {min(times)*1e6:.2f} to {max(times)*1e6:.2f} μs")
+            
+            # Get max temperature at each time step
+            # T_all shape depends on mesh size and time steps
+            # We need to find the max over all spatial points at each time
+            T_max_history = []
+            
+            if hasattr(T_all, 'shape') and len(T_all.shape) > 1:
+                # 2D array: [space, time] or [time, space]
+                for i in range(T_all.shape[-1]):  # Iterate over time
+                    T_at_t = T_all[..., i] if T_all.shape[-1] == len(times) else T_all[i, ...]
+                    T_max_history.append(float(np.max(T_at_t)))
+            else:
+                # Scalar or 1D - just one value
+                T_max_history = [float(np.max(T_all))]
+            
+            # Ensure consistent lengths
+            if len(T_max_history) != len(times):
+                print(f"  Warning: time/T mismatch ({len(times)} vs {len(T_max_history)})")
+                # Try to match by using min length
+                min_len = min(len(times), len(T_max_history))
+                times = times[:min_len]
+                T_max_history = T_max_history[:min_len]
+            
+            results['times'] = np.array(times)
+            results['T_max_history'] = np.array(T_max_history)
+            results['T_max'] = max(T_max_history) if T_max_history else 0
+            
+            print(f"  Max temperature: {results['T_max']:.1f} K ({results['T_max'] - 273.15:.1f} °C)")
+            print(f"  Min temperature: {min(T_max_history):.1f} K")
+            
         except Exception as e:
-            print(f"  Warning: Could not extract results: {e}")
+            import traceback
+            print(f"  Warning: Could not extract full results: {e}")
+            traceback.print_exc()
             results['T_max'] = 0
+            results['times'] = np.array([])
+            results['T_max_history'] = np.array([])
         
         return results
         
@@ -514,6 +623,75 @@ def run_single_simulation(
         sim.close()
 
 
+def save_results_csv(results: Dict[str, Any], filename: str) -> None:
+    """Save temperature history to CSV file."""
+    times = results.get('times', np.array([]))
+    T_max = results.get('T_max_history', np.array([]))
+    
+    if len(times) == 0 or len(T_max) == 0:
+        print(f"No data to save to {filename}")
+        return
+    
+    with open(filename, 'w') as f:
+        f.write("time_s,time_us,T_max_K,T_max_C\n")
+        for t, T in zip(times, T_max):
+            f.write(f"{t:.12e},{t*1e6:.6f},{T:.2f},{T-273.15:.2f}\n")
+    print(f"Saved results to {filename}")
+
+
+def plot_temperature_history(results: Dict[str, Any], filename: str = None) -> None:
+    """Plot temperature vs time with matplotlib."""
+    import matplotlib.pyplot as plt
+    
+    times = results.get('times', np.array([]))
+    T_max = results.get('T_max_history', np.array([]))
+    
+    if len(times) == 0 or len(T_max) == 0:
+        print("No data to plot")
+        return
+    
+    # Convert time to microseconds for better readability
+    times_us = times * 1e6
+    T_C = T_max - 273.15
+    
+    fig, ax = plt.subplots(figsize=(12, 6))
+    
+    ax.plot(times_us, T_C, 'b-', linewidth=1.5, marker='o', markersize=3)
+    ax.set_xlabel('Time (μs)', fontsize=12)
+    ax.set_ylabel('Max Temperature (°C)', fontsize=12)
+    ax.set_title('Maximum Temperature vs Time - Rotating Anode Simulation', fontsize=14)
+    ax.grid(True, alpha=0.3)
+    
+    # Add beam on/off shading
+    from config import PERIOD, RPM, TARGET_RADIUS
+    omega = 2 * np.pi * RPM / 60
+    beam_on_time = 2 * np.arcsin(0.5e-3 / TARGET_RADIUS) / omega  # ~1 mm track width
+    
+    n_periods = int(times_us[-1] / (PERIOD * 1e6)) + 1
+    for n in range(n_periods):
+        t_start = n * PERIOD * 1e6
+        t_on_end = t_start + beam_on_time * 1e6
+        ax.axvspan(t_start, t_on_end, alpha=0.15, color='red', 
+                   label='Beam ON' if n == 0 else None)
+    
+    ax.legend(loc='upper right')
+    
+    # Add info text
+    T_final = T_C[-1] if len(T_C) > 0 else 0
+    T_max_val = max(T_C) if len(T_C) > 0 else 0
+    info_text = f"T_max = {T_max_val:.1f}°C\nT_final = {T_final:.1f}°C"
+    ax.text(0.02, 0.98, info_text, transform=ax.transAxes, fontsize=10,
+            verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    
+    plt.tight_layout()
+    
+    if filename:
+        plt.savefig(filename, dpi=150, bbox_inches='tight')
+        print(f"Saved plot to {filename}")
+    else:
+        plt.show()
+
+
 def main():
     """Main entry point with CLI argument parsing."""
     parser = argparse.ArgumentParser(
@@ -554,6 +732,10 @@ def main():
         '--no-save', action='store_true',
         help='Do not save .mph file'
     )
+    parser.add_argument(
+        '--output-prefix', type=str, default='sim_results',
+        help='Prefix for output files (default: sim_results)'
+    )
     
     args = parser.parse_args()
     
@@ -573,9 +755,23 @@ def main():
     
     if results:
         print("\n=== Results ===")
-        T_max = max(results.get('T_max_history', [0]))
+        T_max = results.get('T_max', 0)
         print(f"Maximum temperature: {T_max:.1f} K ({T_max - 273.15:.1f} °C)")
+        
+        # Save CSV
+        csv_filename = f"{args.output_prefix}_{args.anode_material}_{int(args.anode_thickness)}um.csv"
+        save_results_csv(results, csv_filename)
+        
+        # Plot if matplotlib is available
+        try:
+            plot_filename = f"{args.output_prefix}_{args.anode_material}_{int(args.anode_thickness)}um.png"
+            plot_temperature_history(results, plot_filename)
+        except ImportError as e:
+            print(f"Matplotlib not available, skipping plot: {e}")
+        except Exception as e:
+            print(f"Error creating plot: {e}")
 
 
 if __name__ == '__main__':
     main()
+
