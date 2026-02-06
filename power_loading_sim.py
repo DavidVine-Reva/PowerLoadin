@@ -430,13 +430,15 @@ class RotatingAnodeSimulation:
         results = {}
         
         try:
-            # Get maximum temperature from the simulation
-            # Use simple T evaluation at origin point
-            T_at_origin = self.model.evaluate('T', 
-                                              unit='K',
-                                              outer='last')  # Get last time step
-            T_max = max(T_at_origin) if T_at_origin else 0
-            print(f"  Max temperature at last time step: {T_max:.1f} K")
+            # Get maximum temperature from the simulation at last time step
+            # outer=-1 means last time step, inner not needed for scalar result
+            T_data = self.model.evaluate('T', unit='K')
+            # T_data is typically array - get max from last solution
+            if hasattr(T_data, '__len__') and len(T_data) > 0:
+                T_max = float(max(T_data.flatten())) if hasattr(T_data, 'flatten') else float(max(T_data))
+            else:
+                T_max = float(T_data) if T_data else 0
+            print(f"  Max temperature: {T_max:.1f} K ({T_max - 273.15:.1f} °C)")
             results['T_max'] = T_max
         except Exception as e:
             print(f"  Warning: Could not extract results: {e}")
