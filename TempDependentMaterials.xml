@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archive>
+  <model>
+    <material tag="mat_Mo1" type="Common" component="">
+      <propertyGroup tag="def">
+        <func tag="int1" oper="Interpolation">
+          <label label="Thermal Conductivity - Molybdenum"/>
+          <set name="funcname" value="k_Mo"/>
+          <set name="table" value="{{'298.15','138.3'},{'398.15','134'},{'498.15','129.9'},{'598.15','125.9'},{'698.15','122.1'},{'798.15','118.4'},{'898.15','114.9'},{'998.15','111.6'},{'1098.15','108.4'},{'1198.15','105.4'},{'1298.15','102.6'},{'1398.15','99.9'},{'1498.15','97.4'},{'1598.15','95'},{'1698.15','92.8'},{'1798.15','90.7'},{'1898.15','88.7'},{'1998.15','86.9'},{'2098.15','85.2'},{'2198.15','82.9'},{'2298.15','81.5'},{'2398.15','80.3'},{'2498.15','79.2'},{'2598.15','78.2'},{'2698.15','77.4'},{'2798.15','76.8'},{'2898.15','76.3'}}"/>
+          <set name="fununit" value="{'W / (m*K)'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int2" oper="Interpolation">
+          <label label="Specific Heat Capacity - Molybdenum"/>
+          <set name="funcname" value="Cp_Mo"/>
+          <set name="table" value="{{'298.15','251'},{'398.15','254.4'},{'498.15','257.8'},{'598.15','261'},{'698.15','264.1'},{'798.15','267.2'},{'898.15','270.2'},{'998.15','273'},{'1098.15','275.7'},{'1198.15','278.3'},{'1298.15','280.8'},{'1398.15','283.2'},{'1498.15','285.5'},{'1598.15','287.7'},{'1698.15','289.8'},{'1798.15','291.8'},{'1898.15','293.7'},{'1998.15','295.6'},{'2098.15','297.4'},{'2198.15','300.3'},{'2298.15','302'},{'2398.15','303.5'},{'2498.15','305'},{'2598.15','306.4'},{'2698.15','307.7'},{'2798.15','308.9'},{'2898.15','310'}}"/>
+          <set name="fununit" value="{'J/(kg*K)'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int3" oper="Interpolation">
+          <label label="Density - Molybdenum"/>
+          <set name="funcname" value="rho_Mo"/>
+          <set name="table" value="{{'298.15','10220'},{'398.15','10205'},{'498.15','10191'},{'598.15','10176'},{'698.15','10161'},{'798.15','10147'},{'898.15','10132'},{'998.15','10118'},{'1098.15','10103'},{'1198.15','10089'},{'1298.15','10074'},{'1398.15','10060'},{'1498.15','10046'},{'1598.15','10031'},{'1698.15','10017'},{'1798.15','10003'},{'1898.15','9989'},{'1998.15','9975'},{'2098.15','9962'},{'2198.15','9948'},{'2298.15','9934'},{'2398.15','9920'},{'2498.15','9906'},{'2598.15','9892'},{'2698.15','9879'},{'2798.15','9865'},{'2898.15','9851'}}"/>
+          <set name="fununit" value="{'kg/(m^3)'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int4" oper="Interpolation">
+          <label label="Thermal Diffusivity - Molybdenum"/>
+          <set name="funcname" value="alpha_Mo"/>
+          <set name="table" value="{{'298.15','0.000054'},{'398.15','0.0000518'},{'498.15','0.0000488'},{'598.15','0.0000468'},{'698.15','0.0000456'},{'798.15','0.0000438'},{'898.15','0.000042'},{'998.15','0.0000404'},{'1098.15','0.0000389'},{'1198.15','0.0000374'},{'1298.15','0.0000361'},{'1398.15','0.0000348'},{'1498.15','0.0000336'},{'1598.15','0.0000325'},{'1698.15','0.0000314'},{'1798.15','0.0000304'},{'1898.15','0.0000295'},{'1998.15','0.0000286'},{'2098.15','0.0000279'},{'2198.15','0.0000278'},{'2298.15','0.0000273'},{'2398.15','0.0000269'},{'2498.15','0.0000264'},{'2598.15','0.000026'},{'2698.15','0.0000256'},{'2798.15','0.0000253'},{'2898.15','0.000025'}}"/>
+          <set name="fununit" value="{'(m^2)/s'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <set name="thermalexpansioncoefficient" value="{'4.8e-6[1/K]','0','0','0','4.8e-6[1/K]','0','0','0','4.8e-6[1/K]'}"/>
+        <set name="density" value="rho_Mo(T)"/>
+        <set name="heatcapacity" value="Cp_Mo(T)"/>
+        <set name="thermalconductivity" value="{'k_Mo(T)','0','0','0','k_Mo(T)','0','0','0','k_Mo(T)'}"/>
+        <addInput quantity="temperature"/>
+      </propertyGroup>
+      <propertyGroup tag="Enu" type="Enu" descr="Young's modulus and Poisson's ratio">
+        <set name="E" value="312[GPa]"/>
+        <set name="nu" value="0.31"/>
+      </propertyGroup>
+      <propertyGroup tag="Murnaghan" type="Murnaghan" descr="Murnaghan">
+        <set name="l" value="-300[GPa]"/>
+        <set name="m" value="-850[GPa]"/>
+        <set name="n" value="-910[GPa]"/>
+      </propertyGroup>
+      <label label="Molybdenum"/>
+      <set name="family" value="custom"/>
+      <set name="customspecular" valueDouble="{0.7843137254901961,1,1}"/>
+      <set name="diffuse" value="custom"/>
+      <set name="customdiffuse" valueDouble="{0.7843137254901961,0.7843137254901961,0.7843137254901961}"/>
+      <set name="ambient" value="custom"/>
+      <set name="customambient" valueDouble="{0.7843137254901961,0.7843137254901961,0.7843137254901961}"/>
+      <set name="noise" valueBoolean="true"/>
+      <set name="fresnel" valueDouble="0.3"/>
+      <set name="roughness" valueDouble="0.1"/>
+      <set name="diffusewrap" valueInt="0"/>
+      <set name="reflectance" valueInt="0"/>
+    </material>
+    <material tag="mat_TZM1" type="Common" component="">
+      <info tag="UNS"/>
+      <info tag="Composition"/>
+      <propertyGroup tag="def">
+        <func tag="int5" oper="Interpolation">
+          <label label="Thermal Conductivity - TZM"/>
+          <set name="funcname" value="k_TZM"/>
+          <set name="table" value="{{'298.15','129.7891466'},{'398.15','125.7267685'},{'498.15','121.9455545'},{'598.15','118.4257725'},{'698.15','115.1476908'},{'798.15','112.0915775'},{'898.15','109.2377005'},{'998.15','106.566328'},{'1098.15','104.0577281'},{'1198.15','101.6921689'},{'1298.15','99.44991851'},{'1398.15','97.31124497'},{'1498.15','95.25641641'},{'1598.15','93.26570091'},{'1698.15','91.31936656'},{'1798.15','89.39768147'},{'1898.15','87.48091373'},{'1998.15','85.54933143'},{'2098.15','83.58320266'},{'2198.15','81.56279551'},{'2298.15','79.46837809'},{'2398.15','77.28021849'},{'2498.15','74.97858479'},{'2598.15','72.5437451'},{'2698.15','69.9559675'},{'2798.15','67.19552009'}}"/>
+          <set name="fununit" value="{'W/(m*K)'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int6" oper="Interpolation">
+          <label label="Specific Heat Capacity - TZM"/>
+          <set name="funcname" value="Cp_TZM"/>
+          <set name="table" value="{{'298.15','250.2146522'},{'398.15','254.5653324'},{'498.15','259.0389531'},{'598.15','263.6547714'},{'698.15','268.4320444'},{'798.15','273.390029'},{'898.15','278.5479822'},{'998.15','283.925161'},{'1098.15','289.5408223'},{'1198.15','295.4142233'},{'1298.15','301.5646209'},{'1398.15','308.0112721'},{'1498.15','314.7734339'},{'1598.15','321.8703633'},{'1698.15','329.3213173'},{'1798.15','337.1455529'},{'1898.15','345.3623271'},{'1998.15','353.9908968'},{'2098.15','363.0505192'},{'2198.15','372.5604511'},{'2298.15','382.5399496'},{'2398.15','393.0082717'},{'2498.15','403.9846744'},{'2598.15','415.4884146'},{'2698.15','427.5387494'},{'2798.15','440.1549358'}}"/>
+          <set name="fununit" value="{'J/(kg*K)'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int7" oper="Interpolation">
+          <label label="Density - TZM"/>
+          <set name="funcname" value="rho_TZM"/>
+          <set name="table" value="{{'298.15','10199.15857'},{'398.15','10182.35906'},{'498.15','10165.61481'},{'598.15','10148.92553'},{'698.15','10132.29097'},{'798.15','10115.71084'},{'898.15','10099.18489'},{'998.15','10082.71284'},{'1098.15','10066.29444'},{'1198.15','10049.92943'},{'1298.15','10033.61754'},{'1398.15','10017.35851'},{'1498.15','10001.15209'},{'1598.15','9984.99803'},{'1698.15','9968.896067'},{'1798.15','9952.845953'},{'1898.15','9936.847438'},{'1998.15','9920.900273'},{'2098.15','9905.004212'},{'2198.15','9889.159009'},{'2298.15','9873.364422'},{'2398.15','9857.620206'},{'2498.15','9841.926123'},{'2598.15','9826.281932'},{'2698.15','9810.687397'},{'2798.15','9795.142282'}}"/>
+          <set name="fununit" value="{'kg/m^3'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int8" oper="Interpolation">
+          <label label="Thermal Diffusivity - TZM"/>
+          <set name="funcname" value="alpha_TZM"/>
+          <set name="table" value="{{'298.15','5.08582E-05'},{'398.15','4.85043E-05'},{'498.15','4.63092E-05'},{'598.15','4.42579E-05'},{'698.15','4.23363E-05'},{'798.15','4.05316E-05'},{'898.15','3.88317E-05'},{'998.15','3.72253E-05'},{'1098.15','3.57022E-05'},{'1198.15','3.42526E-05'},{'1298.15','3.28675E-05'},{'1398.15','3.15387E-05'},{'1498.15','3.02584E-05'},{'1598.15','2.90197E-05'},{'1698.15','2.78161E-05'},{'1798.15','2.66417E-05'},{'1898.15','2.54912E-05'},{'1998.15','2.43598E-05'},{'2098.15','2.32433E-05'},{'2198.15','2.21379E-05'},{'2298.15','2.10403E-05'},{'2398.15','1.99478E-05'},{'2498.15','1.88579E-05'},{'2598.15','1.77685E-05'},{'2698.15','1.66782E-05'},{'2798.15','1.55856E-05'}}"/>
+          <set name="fununit" value="{'m^2/s'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="k_solid_average_3" oper="Piecewise">
+          <label label="Piecewise 1"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'293.0','1647.0','144.6175-0.09311926*T^1+8.442514E-5*T^2-3.824779E-8*T^3+6.34004E-12*T^4'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="W/(m*K)"/>
+        </func>
+        <func tag="res" oper="Piecewise">
+          <label label="Piecewise 1.1"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'1.0','15.0','1.4E-8+1.084943E-13*T^1-1.576891E-14*T^2+2.525078E-15*T^3'},{'15.0','40.0','1.383527311E-8+2.696833E-11*T^1-1.484429E-12*T^2+2.986667E-14*T^3'},{'40.0','200.0','1.567651185E-8-1.180722E-10*T^1+2.398988E-12*T^2-5.337779E-15*T^3'},{'200.0','2894.0','-2.207941088E-9+2.325616E-10*T^1+2.59083E-14*T^2-2.668883E-18*T^3'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="ohm*m"/>
+        </func>
+        <func tag="alpha" oper="Piecewise">
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'293.0','1850.0','4.674328947E-6+1.899436413E-9*T^1-7.935836948E-13*T^2+1.954197812E-16*T^3'},{'1850.0','2500.0','5.54629895E-6+5.45375134E-10*T^1-2.023373557E-13*T^2+1.337456877E-16*T^3'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="1/K"/>
+        </func>
+        <func tag="C" oper="Piecewise">
+          <label label="Piecewise 3"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'273.0','2523.16','292.44352512-0.05588409808*T^1+4.757777024E-5*T^2-7.396529592E-10*T^3'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="J/(kg*K)"/>
+        </func>
+        <func tag="sigma" oper="Piecewise">
+          <label label="Piecewise 4"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'1.0','15.0','1/(2.525078000E-15*T^3-1.576891000E-14*T^2+1.084943000E-13*T+1.400000000E-08)'},{'15.0','40.0','1/(2.986667000E-14*T^3-1.484429000E-12*T^2+2.696833000E-11*T+1.383527311E-08)'},{'40.0','200.0','1/(-5.337779000E-15*T^3+2.398988000E-12*T^2-1.180722000E-10*T+1.567651185E-08)'},{'200.0','2894.0','1/(-2.668883000E-18*T^3+2.590830000E-14*T^2+2.325616000E-10*T-2.207941088E-09)'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="S/m"/>
+        </func>
+        <func tag="rho" oper="Piecewise">
+          <label label="Piecewise 5"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'293.0','2500.0','10200.3855-0.1179965441*T^1-7.930664229E-5*T^2+3.805831504E-8*T^3-8.90164393E-12*T^4'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="kg/m^3"/>
+        </func>
+        <func tag="TD_solid_average_3" oper="Piecewise">
+          <label label="Piecewise 6"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'293.0','1323.16','4.86488E-5-2.275706E-8*T^1+2.051055E-11*T^2-1.215169E-14*T^3+2.333727E-18*T^4'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="m^2/s"/>
+        </func>
+        <set name="thermalconductivity" value="{'k_TZM(T)','0','0','0','k_TZM(T)','0','0','0','k_TZM(T)'}"/>
+        <setPropertyInfo name="thermalconductivity" info="Reference: J.Z. Briggs and R.Q. Barr, &quot;Arc-cast molybdenum-base TZM alloy: properties and applications&quot;, High Temperatures-High Pressures, v3, No. 4, p363 (1971); Southern Research Institute, &quot;The Mechanical and Thermal Properties of Tungsten and TZM Sheet Produced in the Refractory Metal Sheet Rolling Program, Part 1&quot;, Birmingham, Alabama, USA, report AD638631 (1966) https://apps.dtic.mil/sti/citations/AD0638631&#xa;Note: Tliq = 2610 &#xb0;C (2883 K), average of the sheet and arc-cast data"/>
+        <set name="resistivity" value="{'res(T)','0','0','0','res(T)','0','0','0','res(T)'}"/>
+        <setPropertyInfo name="resistivity" info="Reference: J.Z. Briggs and R.Q. Barr, &quot;Arc-cast molybdenum-base TZM alloy: properties and applications&quot;, High Temperatures-High Pressures, v3, No. 4, p363 (1971)&#xa;Note: Tliq = 2610 &#xb0;C (2883 K), arc-cast"/>
+        <set name="thermalexpansioncoefficient" value="{'(alpha(T)+(Tempref-293[K])*if(abs(T-Tempref)&gt;1e-3,(alpha(T)-alpha(Tempref))/(T-Tempref),d(alpha(T),T)))/(1+alpha(Tempref)*(Tempref-293[K]))','0','0','0','(alpha(T)+(Tempref-293[K])*if(abs(T-Tempref)&gt;1e-3,(alpha(T)-alpha(Tempref))/(T-Tempref),d(alpha(T),T)))/(1+alpha(Tempref)*(Tempref-293[K]))','0','0','0','(alpha(T)+(Tempref-293[K])*if(abs(T-Tempref)&gt;1e-3,(alpha(T)-alpha(Tempref))/(T-Tempref),d(alpha(T),T)))/(1+alpha(Tempref)*(Tempref-293[K]))'}"/>
+        <setPropertyInfo name="thermalexpansioncoefficient" info="Reference: Southern Research Institute, &quot;The Mechanical and Thermal Properties of Tungsten and TZM Sheet Produced in the Refractory Metal Sheet Rolling Program, Part 1&quot;, Birmingham, Alabama, USA, report AD638631 (1966) https://apps.dtic.mil/sti/citations/AD0638631; I.B. Fieldhouse, J.I. Lang, and H.H. Blau, &quot;Investigation of Feasibility of Utilizing Available Heat Resistant Materials for Hypersonic Leading Edge Applications Volume IV, Thermal Properties of Molybdenum Alloy and Graphite&quot;, US Air Force Report WADC TR-59-744, AD A278180 (1960) https://apps.dtic.mil/dtic/tr/fulltext/u2/a278180.pdf; J.C. Hedge, C. Kostenko, and J.I. Lang, &quot;Thermal Properties of Refractory Alloys&quot;, Wright-Patterson Air Force Base, USAF contract AF 33(657)-8810, Project No. 7360, ASD-TDR-63-597, AD0424375 (1963) https://apps.dtic.mil/sti/citations/AD0424375&#xa;Note: the reference temperature is 20 &#xb0;C (293 K), Tliq = 2610 &#xb0;C (2883 K), measured on sheet from an arc melted ingot, parallel to the plane of the sheet, recrystallized, warm worked and stress-relieved&#xa;Reference temperature: 293.00[K]"/>
+        <set name="heatcapacity" value="Cp_TZM(T)"/>
+        <setPropertyInfo name="heatcapacity" info="Reference: J.Z. Briggs and R.Q. Barr, &quot;Arc-cast molybdenum-base TZM alloy: properties and applications&quot;, High Temperatures-High Pressures, v3, No. 4, p363 (1971)&#xa;Note: Tliq = 2610 &#xb0;C (2883 K), arc-cast"/>
+        <set name="electricconductivity" value="{'sigma(T)','0','0','0','sigma(T)','0','0','0','sigma(T)'}"/>
+        <setPropertyInfo name="electricconductivity" info="Reference: J.Z. Briggs and R.Q. Barr, &quot;Arc-cast molybdenum-base TZM alloy: properties and applications&quot;, High Temperatures-High Pressures, v3, No. 4, p363 (1971)&#xa;Note: Tliq = 2610 &#xb0;C (2883 K), arc-cast, calculated as the reciprocal of the resistivity"/>
+        <set name="density" value="rho_TZM(T)"/>
+        <setPropertyInfo name="density" info="Reference: Southern Research Institute, &quot;The Mechanical and Thermal Properties of Tungsten and TZM Sheet Produced in the Refractory Metal Sheet Rolling Program, Part 1&quot;, Birmingham, Alabama, USA, report AD638631 (1966) https://apps.dtic.mil/sti/citations/AD0638631; I.B. Fieldhouse, J.I. Lang, and H.H. Blau, &quot;Investigation of Feasibility of Utilizing Available Heat Resistant Materials for Hypersonic Leading Edge Applications Volume IV, Thermal Properties of Molybdenum Alloy and Graphite&quot;, US Air Force Report WADC TR-59-744, AD A278180 (1960) https://apps.dtic.mil/dtic/tr/fulltext/u2/a278180.pdf; J.C. Hedge, C. Kostenko, and J.I. Lang, &quot;Thermal Properties of Refractory Alloys&quot;, Wright-Patterson Air Force Base, USAF contract AF 33(657)-8810, Project No. 7360, ASD-TDR-63-597, AD0424375 (1963) https://apps.dtic.mil/sti/citations/AD0424375&#xa;Note: Tliq = 2610 &#xb0;C (2883 K), measured on sheet from an arc melted ingot, recrystallized, warm worked and stress-relieved, calculated from the linear expansion and the room temperature density"/>
+        <set name="TD" value="TD_solid_average_3(T)"/>
+        <setPropertyInfo name="TD" info="Reference: see the references for the thermal conductivity, specific heat, and density&#xa;Note: Tliq = 2610 &#xb0;C (2883 K), calculated from the thermal conductivity, specific heat, and density"/>
+        <addInput quantity="temperature"/>
+        <addInput quantity="strainreferencetemperature"/>
+      </propertyGroup>
+      <propertyGroup tag="ThermalExpansion" type="ThermalExpansion" descr="Thermal expansion">
+        <func tag="dL" oper="Piecewise">
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'293.0','2500.0','-0.001309979245+3.762286478E-6*T^1+2.779189032E-9*T^2-1.322986549E-12*T^3+3.143519578E-16*T^4'}}"/>
+          <set name="argunit" value="K"/>
+        </func>
+        <func tag="CTE" oper="Piecewise">
+          <label label="Piecewise 1"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'293.0','2500.0','3.762286478E-6+5.558378064E-9*T^1-3.968959647E-12*T^2+1.257407831E-15*T^3'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="1/K"/>
+        </func>
+        <set name="alphatan" value="{'CTE(T)','0','0','0','CTE(T)','0','0','0','CTE(T)'}"/>
+        <setPropertyInfo name="alphatan" info="Reference: Southern Research Institute, &quot;The Mechanical and Thermal Properties of Tungsten and TZM Sheet Produced in the Refractory Metal Sheet Rolling Program, Part 1&quot;, Birmingham, Alabama, USA, report AD638631 (1966) https://apps.dtic.mil/sti/citations/AD0638631; I.B. Fieldhouse, J.I. Lang, and H.H. Blau, &quot;Investigation of Feasibility of Utilizing Available Heat Resistant Materials for Hypersonic Leading Edge Applications Volume IV, Thermal Properties of Molybdenum Alloy and Graphite&quot;, US Air Force Report WADC TR-59-744, AD A278180 (1960) https://apps.dtic.mil/dtic/tr/fulltext/u2/a278180.pdf; J.C. Hedge, C. Kostenko, and J.I. Lang, &quot;Thermal Properties of Refractory Alloys&quot;, Wright-Patterson Air Force Base, USAF contract AF 33(657)-8810, Project No. 7360, ASD-TDR-63-597, AD0424375 (1963) https://apps.dtic.mil/sti/citations/AD0424375&#xa;Note: Tliq = 2610 &#xb0;C (2883 K), measured on sheet from an arc melted ingot, parallel to the plane of the sheet, warm worked and stress-relieved"/>
+        <set name="dL" value="{'(dL(T)-dL(Tempref))/(1+dL(Tempref))','0','0','0','(dL(T)-dL(Tempref))/(1+dL(Tempref))','0','0','0','(dL(T)-dL(Tempref))/(1+dL(Tempref))'}"/>
+        <setPropertyInfo name="dL" info="Reference: Southern Research Institute, &quot;The Mechanical and Thermal Properties of Tungsten and TZM Sheet Produced in the Refractory Metal Sheet Rolling Program, Part 1&quot;, Birmingham, Alabama, USA, report AD638631 (1966) https://apps.dtic.mil/sti/citations/AD0638631; I.B. Fieldhouse, J.I. Lang, and H.H. Blau, &quot;Investigation of Feasibility of Utilizing Available Heat Resistant Materials for Hypersonic Leading Edge Applications Volume IV, Thermal Properties of Molybdenum Alloy and Graphite&quot;, US Air Force Report WADC TR-59-744, AD A278180 (1960) https://apps.dtic.mil/dtic/tr/fulltext/u2/a278180.pdf; J.C. Hedge, C. Kostenko, and J.I. Lang, &quot;Thermal Properties of Refractory Alloys&quot;, Wright-Patterson Air Force Base, USAF contract AF 33(657)-8810, Project No. 7360, ASD-TDR-63-597, AD0424375 (1963) https://apps.dtic.mil/sti/citations/AD0424375&#xa;Note: the reference temperature is 20 &#xb0;C (293 K), Tliq = 2610 &#xb0;C (2883 K), measured on sheet from an arc melted ingot, parallel to the plane of the sheet, warm worked and stress-relieved&#xa;Reference temperature: 293.00[K]"/>
+        <addInput quantity="temperature"/>
+        <addInput quantity="strainreferencetemperature"/>
+      </propertyGroup>
+      <label label="TZM [solid,average]"/>
+      <set name="info" value="{{'UNS','UNS','R03640'},{'Composition','Composition','bal. Mo, (0.4-0.55) Ti, (0.06-0.12) Zr, (0.01-0.04) C (wt %)'}}"/>
+    </material>
+    <material tag="mat3" type="Common" component="">
+      <propertyGroup tag="def">
+        <func tag="res_solid_pure_1" oper="Piecewise">
+          <label label="Piecewise 3"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'0.0','10.15','1.448908E-13+2.405067E-14*T^1-4.549434E-15*T^2+1.438663E-15*T^3'},{'10.15','30.0','-4.9567853E-11+1.105436E-11*T^1-8.131714E-13*T^2+2.158E-14*T^3'},{'30.0','150.0','2.11182994E-9-1.595764E-10*T^1+3.425685E-12*T^2-1.017725E-14*T^3'},{'150.0','3660.0','-1.03853549E-8+1.983571E-10*T^1+7.061876E-14*T^2-1.566782E-17*T^3+1.600655E-21*T^4'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="ohm*m"/>
+        </func>
+        <func tag="alpha_solid_1" oper="Piecewise">
+          <label label="Piecewise 1"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'0.0','160.0','2.981614E-6+1.172841E-8*T^1+1.823139E-11*T^2-5.824731E-13*T^3+1.924415E-15*T^4'},{'160.0','265.0','2.785325677E-6+1.438259E-8*T^1-4.00443E-11*T^2+3.389941E-14*T^3'},{'265.0','3400.0','4.216241413E-6+8.750312E-10*T^1-5.224887E-13*T^2+2.227021E-16*T^3-2.452513E-20*T^4'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="1/K"/>
+        </func>
+        <func tag="C_solid_1" oper="Piecewise">
+          <label label="Piecewise 2.1"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'1.0','19.5','0.004170450116+9.725967408E-4*T^1+0.0013421962384*T^2+3.782982428E-5*T^3+5.821006736E-6*T^4'},{'19.5','50.0','-1.153531995739+0.34838377248*T^1-0.033084825192*T^2+0.0013988509456*T^3-1.2283571296E-5*T^4'},{'50.0','300.0','-79.34265593976+2.9740637672*T^1-0.017345470728*T^2+4.762705776E-5*T^3-5.001545232E-8*T^4'},{'300.0','3600.0','117.8497846754+0.06476271344*T^1-6.267016952E-5*T^2+3.8274650424E-8*T^3-1.0510086664E-11*T^4+1.20869484E-15*T^5'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="J/(kg*K)"/>
+        </func>
+        <func tag="sigma_solid_pure_1" oper="Piecewise">
+          <label label="Piecewise 3.1"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'0.0','10.15','1/(1.438663E-15*T^3-4.549434E-15*T^2+2.405067E-14*T+1.448908E-13)'},{'10.15','30.0','1/(2.158000E-14*T^3-8.131714E-13*T^2+1.105436E-11*T-4.95678530E-11)'},{'30.0','150.0','1/(-1.017725E-14*T^3+3.425685E-12*T^2-1.595764E-10*T+2.11182994E-09)'},{'150.0','3660.0','1/(1.600655E-21*T^4-1.566782E-17*T^3+7.061876E-14*T^2+1.983571E-10*T-1.03853549E-08)'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="S/m"/>
+        </func>
+        <func tag="HC_solid_1" oper="Piecewise">
+          <label label="Piecewise 4"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'1.0','19.5','7.667372464E-4+1.7881190088E-4*T^1+2.4676278048E-4*T^2+6.955012992E-6*T^3+1.070191888E-6*T^4'},{'19.5','50.0','-0.2120769373535+0.0640503456*T^1-0.006082644808*T^2+2.571787648E-4*T^3-2.2583345016E-6*T^4'},{'50.0','300.0','-14.58713467442+0.5467814376*T^1-0.0031889648856*T^2+8.75623336E-6*T^3-9.195339976E-9*T^4'},{'300.0','3600.0','21.6666072651+0.011906622184*T^1-1.1521911752E-5*T^2+7.036793456E-9*T^3-1.9322791472E-12*T^4+2.22218516E-16*T^5'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="J/(mol*K)"/>
+        </func>
+        <func tag="epsilon" oper="Piecewise">
+          <label label="Piecewise 5"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'273.0','1500.0','0.01804211-5.214754E-6*T^1+1.233321E-7*T^2-8.141304E-11*T^3+5.735938E-14*T^4-1.652179E-17*T^5'},{'1500.0','3500.0','-0.02163961694-1.236257E-4*T^1+4.143182E-7*T^2-2.342655E-10*T^3+5.537822E-14*T^4-4.8693E-18*T^5'}}"/>
+          <set name="argunit" value="K"/>
+        </func>
+        <func tag="rho_solid_1" oper="Piecewise">
+          <label label="Piecewise 6"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'0.0','20.0','19349.83225'},{'20.0','160.0','19349.8778-0.01571847*T^1+0.001303651*T^2-3.583342E-5*T^3+2.218084E-7*T^4-4.566527E-10*T^5'},{'160.0','600.0','19358.51889-0.1011356*T^1-5.396347E-4*T^2+7.805729E-7*T^3-4.216045E-10*T^4'},{'600.0','3400.0','19378.78-0.2689446*T^1+6.144946E-6*T^2-9.687885E-9*T^3'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="kg/m^3"/>
+        </func>
+        <func tag="TD_solid_1" oper="Piecewise">
+          <label label="Piecewise 7"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'1.0','5.0','0.07872743754+18.8042854*T^1-10.1423678*T^2+2.41315634*T^3-0.281232128*T^4+0.0129899132*T^5'},{'5.0','23.0','20.99000991-4.39425748*T^1+0.420783675*T^2-0.0242254787*T^3+8.89894394E-4*T^4-1.93002147E-5*T^5+1.85620443E-7*T^6'},{'23.0','35.5','12.47934399-2.15923496*T^1+0.157499852*T^2-0.00617504593*T^3+1.36918355E-4*T^4-1.6254176E-6*T^5+8.06340447E-9*T^6'},{'35.5','55.0','0.8125870381-0.0924133903*T^1+0.00445756403*T^2-1.16087504E-4*T^3+1.71536165E-6*T^4-1.36000358E-8*T^5+4.5107617E-11*T^6'},{'55.0','115.0','0.02000842024-0.00114096468*T^1+2.77600511E-5*T^2-3.64065278E-7*T^3+2.70275556E-9*T^4-1.07436932E-11*T^5+1.78382592E-14*T^6'},{'115.0','333.0','8.432275209E-4-1.8868084E-5*T^1+2.00670311E-7*T^2-1.152879E-9*T^3+3.71863945E-12*T^4-6.34617486E-15*T^5+4.46202343E-18*T^6'},{'333.0','1003.0','8.189039725E-5+4.56677818E-8*T^1-5.44612821E-10*T^2+1.00464168E-12*T^3-7.64163098E-16*T^4+2.14714294E-19*T^5'},{'1003.0','3400.0','6.05482739E-5-3.58255113E-8*T^1+1.93516926E-11*T^2-7.29768802E-15*T^3+1.49232211E-18*T^4-1.27703479E-22*T^5'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="m^2/s"/>
+        </func>
+        <func tag="nemiss_solid_1" oper="Piecewise">
+          <label label="Piecewise 8"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'1630.0','2930.0','0.2384602-7.9450536E-6*T^1'}}"/>
+          <set name="argunit" value="K"/>
+        </func>
+        <func tag="S" oper="Piecewise">
+          <label label="Piecewise 9"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'273.0','1100.0','-1.10999308E-5+4.54219788E-8*T^1-1.58184042E-11*T^2-9.11359741E-16*T^3'},{'1100.0','2400.0','-1.24189682E-5+5.13607217E-8*T^1-2.39553811E-11*T^2+2.56885235E-15*T^3'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="V/K"/>
+        </func>
+        <func tag="int9" oper="Interpolation">
+          <label label="Thermal Conductivity - Tungsten"/>
+          <set name="funcname" value="k_W"/>
+          <set name="table" value="{{'298.15','175.6314705'},{'398.15','161.7151304'},{'498.15','151.1317565'},{'598.15','142.724791'},{'698.15','135.862904'},{'798.15','130.1523911'},{'898.15','125.3285852'},{'998.15','121.2046533'},{'1098.15','117.6439892'},{'1198.15','114.5439725'},{'1298.15','111.8258135'},{'1398.15','109.4279107'},{'1498.15','107.3013493'},{'1598.15','105.4067635'},{'1698.15','103.7120955'},{'1798.15','102.190964'},{'1898.15','100.8214536'},{'1998.15','99.58520359'},{'2098.15','98.46671244'},{'2198.15','97.45279994'},{'2298.15','96.53218705'},{'2398.15','95.69516406'},{'2498.15','94.93332612'},{'2598.15','94.23936068'},{'2698.15','93.6068753'},{'2798.15','93.03025703'},{'2898.15','92.50455696'},{'2998.15','92.02539468'},{'3098.15','91.58887879'},{'3198.15','91.19154047'},{'3298.15','90.83027753'},{'3398.15','90.50230717'},{'3498.15','90.2051259'},{'3598.15','89.93647528'}}"/>
+          <set name="fununit" value="{'W/(m*K)'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int10" oper="Interpolation">
+          <label label="Specific Heat Capacity - Tungsten"/>
+          <set name="funcname" value="Cp_W"/>
+          <set name="table" value="{{'298.15','132'},{'398.15','135.3022864'},{'498.15','138.5918762'},{'598.15','141.8687695'},{'698.15','145.1329663'},{'798.15','148.3844666'},{'898.15','151.6232703'},{'998.15','154.8493776'},{'1098.15','158.0627883'},{'1198.15','161.2635025'},{'1298.15','164.4515201'},{'1398.15','167.6268412'},{'1498.15','170.7894659'},{'1598.15','173.9393939'},{'1698.15','177.0766255'},{'1798.15','180.2011605'},{'1898.15','183.3129991'},{'1998.15','186.4121411'},{'2098.15','189.4985865'},{'2198.15','192.5723355'},{'2298.15','195.6333879'},{'2398.15','198.6817438'},{'2498.15','201.7174032'},{'2598.15','204.740366'},{'2698.15','207.7506323'},{'2798.15','210.7482022'},{'2898.15','213.7330754'},{'2998.15','216.7052522'},{'3098.15','219.6647324'},{'3198.15','222.6115161'},{'3298.15','225.5456033'},{'3398.15','228.466994'},{'3498.15','231.3756881'},{'3598.15','234.2716858'}}"/>
+          <set name="fununit" value="{'J/(kg*K)'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int11" oper="Interpolation">
+          <label label="Density - Tungsten"/>
+          <set name="funcname" value="rho_W"/>
+          <set name="table" value="{{'298.15','19300'},{'398.15','19273.98013'},{'498.15','19248.03032'},{'598.15','19222.15029'},{'698.15','19196.33977'},{'798.15','19170.59846'},{'898.15','19144.9261'},{'998.15','19119.3224'},{'1098.15','19093.7871'},{'1198.15','19068.31991'},{'1298.15','19042.92057'},{'1398.15','19017.58881'},{'1498.15','18992.32435'},{'1598.15','18967.12692'},{'1698.15','18941.99627'},{'1798.15','18916.93212'},{'1898.15','18891.93422'},{'1998.15','18867.0023'},{'2098.15','18842.13609'},{'2198.15','18817.33535'},{'2298.15','18792.59981'},{'2398.15','18767.92921'},{'2498.15','18743.3233'},{'2598.15','18718.78182'},{'2698.15','18694.30453'},{'2798.15','18669.89117'},{'2898.15','18645.54149'},{'2998.15','18621.25525'},{'3098.15','18597.03218'},{'3198.15','18572.87206'},{'3298.15','18548.77463'},{'3398.15','18524.73965'},{'3498.15','18500.76687'},{'3598.15','18476.85606'}}"/>
+          <set name="fununit" value="{'kg/m^3'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int12" oper="Interpolation">
+          <label label="Thermal Diffusivity - Tungsten"/>
+          <set name="funcname" value="alpha_W"/>
+          <set name="table" value="{{'298.15','6.894E-05'},{'398.15','6.20118E-05'},{'498.15','5.66541E-05'},{'598.15','5.23372E-05'},{'698.15','4.87659E-05'},{'798.15','4.57539E-05'},{'898.15','4.31748E-05'},{'998.15','4.0939E-05'},{'1098.15','3.89806E-05'},{'1198.15','3.72498E-05'},{'1298.15','3.57084E-05'},{'1398.15','3.43265E-05'},{'1498.15','3.308E-05'},{'1598.15','3.19499E-05'},{'1698.15','3.09202E-05'},{'1798.15','2.99781E-05'},{'1898.15','2.91128E-05'},{'1998.15','2.83151E-05'},{'2098.15','2.75774E-05'},{'2198.15','2.68932E-05'},{'2298.15','2.62568E-05'},{'2398.15','2.56635E-05'},{'2498.15','2.5109E-05'},{'2598.15','2.45896E-05'},{'2698.15','2.41022E-05'},{'2798.15','2.36439E-05'},{'2898.15','2.32122E-05'},{'2998.15','2.2805E-05'},{'3098.15','2.24202E-05'},{'3198.15','2.20561E-05'},{'3298.15','2.17111E-05'},{'3398.15','2.13838E-05'},{'3498.15','2.10729E-05'},{'3598.15','2.07772E-05'}}"/>
+          <set name="fununit" value="{'m^2/s'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <set name="resistivity" value="{'res_solid_pure_1(T)','0','0','0','res_solid_pure_1(T)','0','0','0','res_solid_pure_1(T)'}"/>
+        <setPropertyInfo name="resistivity" info="Reference: P.D. Desai, T.K. Chu, H.M. James, and C.Y. Ho, &quot;Electrical Resistivity of Selected Elements&quot;, Journal of Physical and Chemical Reference Data, v13, No. 4, p1069 (1984) https://srd.nist.gov/JPCRD/jpcrd258.pdf&#xa;Note: T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K), data below -73 &#xb0;C (200 K) is for a residual resistivity of 1.5 x 10{&#xb9;&#xb3; ohm-m, not corrected for thermal expansion, 5% error, purity 99.99% or higher"/>
+        <set name="thermalexpansioncoefficient" value="{'(alpha_solid_1(T)+(Tempref-293[K])*if(abs(T-Tempref)&gt;1e-3,(alpha_solid_1(T)-alpha_solid_1(Tempref))/(T-Tempref),d(alpha_solid_1(T),T)))/(1+alpha_solid_1(Tempref)*(Tempref-293[K]))','0','0','0','(alpha_solid_1(T)+(Tempref-293[K])*if(abs(T-Tempref)&gt;1e-3,(alpha_solid_1(T)-alpha_solid_1(Tempref))/(T-Tempref),d(alpha_solid_1(T),T)))/(1+alpha_solid_1(Tempref)*(Tempref-293[K]))','0','0','0','(alpha_solid_1(T)+(Tempref-293[K])*if(abs(T-Tempref)&gt;1e-3,(alpha_solid_1(T)-alpha_solid_1(Tempref))/(T-Tempref),d(alpha_solid_1(T),T)))/(1+alpha_solid_1(Tempref)*(Tempref-293[K]))'}"/>
+        <setPropertyInfo name="thermalexpansioncoefficient" info="Reference: G.K. White and R.B. Roberts, &quot;Thermal expansion of reference materials: tungsten and alpha-Al2O3&quot;, High Temperatures-High Pressures, v15, No. 3, p321 (1983); R.R. Kirby, &quot;Thermal expansion of tungsten from 293 to 1800 K&quot;, High Temperatures-High Pressures, v4, No. 4, p459 (1972); F.C. Nix and D. MacNair, &quot;The Thermal Expansion of Pure Metals. II: Molybdenum, Palladium, Silver, Tantalum, Tungsten, Platinum, and Lead&quot;, Physical Review, v61, No. 1-2, p74 (1942) https://doi.org/10.1103/PhysRev.61.74; R.J. Corruccini and J.J. Gniewek, &quot;Thermal Expansion of Technical Solids at Low Temperatures: A Compilation From the Literature&quot;, NBS Monograph 29 (1961) https://digital.library.unt.edu/ark:/67531/metadc70437/&#xa;Note: the reference temperature is 20 &#xb0;C (293 K), T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K)&#xa;Reference temperature: 293.00[K]"/>
+        <set name="heatcapacity" value="Cp_W(T)"/>
+        <setPropertyInfo name="heatcapacity" info="Reference: G.K. White and S.J. Collocott, &quot;Heat Capacity of Reference Materials: Cu and W&quot;, Journal of Physical and Chemical Reference Data, v13, No. 4, p1251 (1984) https://srd.nist.gov/JPCRD/jpcrd263.pdf; A. Cezairliyan and J.L. McClure, &quot;High-Speed (Subsecond) Measurement of Heat Capacity, Electrical Resistivity, and Thermal Radiation Properties of Tungsten in the Range 2000 to 3600 K&quot;, Journal of Research of the National Bureau Standards, v75A, No. 4, p283 (1971) http://dx.doi.org/10.6028/jres.075A.027&#xa;Note: T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K), error less than 2%"/>
+        <set name="electricconductivity" value="{'sigma_solid_pure_1(T)','0','0','0','sigma_solid_pure_1(T)','0','0','0','sigma_solid_pure_1(T)'}"/>
+        <setPropertyInfo name="electricconductivity" info="Reference: P.D. Desai, T.K. Chu, H.M. James, and C.Y. Ho, &quot;Electrical Resistivity of Selected Elements&quot;, Journal of Physical and Chemical Reference Data, v13, No. 4, p1069 (1984) https://srd.nist.gov/JPCRD/jpcrd258.pdf&#xa;Note: T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K), data below -73 &#xb0;C (200 K) is for a residual resistivity of 1.5 x 10{&#xb9;&#xb3; ohm-m, not corrected for thermal expansion, 5% error, calculated as the reciprocal of the resistivity, purity 99.99% or higher"/>
+        <set name="HC" value="HC_solid_1(T)"/>
+        <setPropertyInfo name="HC" info="Reference: G.K. White and S.J. Collocott, &quot;Heat Capacity of Reference Materials: Cu and W&quot;, Journal of Physical and Chemical Reference Data, v13, No. 4, p1251 (1984) https://srd.nist.gov/JPCRD/jpcrd263.pdf; A. Cezairliyan and J.L. McClure, &quot;High-Speed (Subsecond) Measurement of Heat Capacity, Electrical Resistivity, and Thermal Radiation Properties of Tungsten in the Range 2000 to 3600 K&quot;, Journal of Research of the National Bureau Standards, v75A, No. 4, p283 (1971) http://dx.doi.org/10.6028/jres.075A.027&#xa;Note: T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K), error less than 2%"/>
+        <set name="emissivity" value="epsilon(T)"/>
+        <setPropertyInfo name="emissivity" info="Reference: W.E. Forsythe and E.Q. Adams, &quot;Radiating Characteristics of Tungsten and Tungsten Lamps&quot;, Journal of the Optical Society of America, v35, p108 (1945) https://doi.org/10.1364/JOSA.35.000108; A.V. Logunov and A.I. Kovalev, &quot;Experimental investigation of the thermophysical properties of tungsten - rhenium cast alloys. 1. The W-5% Re alloy&quot;, High Temperatures-High Pressures, v5, No. 6, p625 (1973); A. Cezairliyan, &quot;High-speed (subsecond) simultaneous measurement of specific heat, electrical resistivity, and hemispherical total emittance of Ta - 10(wt.%)W alloy in the range 1500 to 3200 K&quot;, High Temperatures-High Pressures, v4, No. 5, p541 (1972); W.E. Forsythe and E.M. Watson, &quot;Resistance and Radiation of Tungsten as a Function of Temperature&quot;, Journal of the Optical Society America, v24, p114 (1934) https://doi.org/10.1364/JOSA.24.000114; R.D. Allen, L.F. Glasier Jr., and P.L. Jordan, &quot;Spectral Emissivity, Total Emissivity, and Thermal Conductivity of Molybdenum, Tantalum, and Tungsten above 2300 K&quot;, Journal of Applied Physics, v31, No. 8, p1382 (1960) https://doi.org/10.1063/1.1735847&#xa;Note: T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K)"/>
+        <set name="density" value="rho_W(T)"/>
+        <setPropertyInfo name="density" info="Reference: G.K. White and R.B. Roberts, &quot;Thermal expansion of reference materials: tungsten and alpha-Al2O3&quot;, High Temperatures-High Pressures, v15, No. 3, p321 (1983); R.R. Kirby, &quot;Thermal expansion of tungsten from 293 to 1800 K&quot;, High Temperatures-High Pressures, v4, No. 4, p459 (1972); F.C. Nix and D. MacNair, &quot;The Thermal Expansion of Pure Metals. II: Molybdenum, Palladium, Silver, Tantalum, Tungsten, Platinum, and Lead&quot;, Physical Review, v61, No. 1-2, p74 (1942) https://doi.org/10.1103/PhysRev.61.74; R.J. Corruccini and J.J. Gniewek, &quot;Thermal Expansion of Technical Solids at Low Temperatures: A Compilation From the Literature&quot;, NBS Monograph 29 (1961) https://digital.library.unt.edu/ark:/67531/metadc70437/&#xa;Note: T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K), calculated from the linear expansion and the room temperature density"/>
+        <set name="TD" value="TD_solid_1(T)"/>
+        <setPropertyInfo name="TD" info="Reference: see the references for the thermal conductivity, specific heat, and density&#xa;Note: T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K), below 0 &#xb0;C (273 K) the data from Ho et al. was used and above 0 &#xb0;C (273 K) the data from Ho et al. and Binkele were used for the thermal conductivity, calculated from the thermal conductivity, specific heat, and density"/>
+        <set name="nemiss" value="nemiss_solid_1(T)"/>
+        <setPropertyInfo name="nemiss" info="Reference: C.D. Pears and S. Oglesby, Southern Research Institute, Birmingham, Alabama, USA, &quot;The thermal properties of twenty-six solid materials to 5000F or their destruction temperatures&quot;, Report ASD-TDR-62-765, AD-298061 (1962) https://www.osti.gov/biblio/4746813 and https://archive.org/details/ad-298061/mode/2up&#xa;Note: T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K), hot-pressed, &#xb1; 10% scatter"/>
+        <set name="S" value="S(T)"/>
+        <setPropertyInfo name="S" info="Reference: N. Cusack and P. Kendall, &quot;The Absolute Scale of Thermoelectric Power at High Temperature&quot;, Proceedings of the Physical Society, v72, No. 5 (1958) https://doi.org/10.1088/0370-1328/72/5/429&#xa;Note: T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K), p-type"/>
+        <set name="thermalconductivity" value="{'k_W(T)','0','0','0','k_W(T)','0','0','0','k_W(T)'}"/>
+        <addInput quantity="temperature"/>
+        <addInput quantity="strainreferencetemperature"/>
+      </propertyGroup>
+      <propertyGroup tag="ThermalExpansion" type="ThermalExpansion" descr="Thermal expansion">
+        <func tag="dL_solid_1" oper="Piecewise">
+          <label label="Piecewise"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'0.0','20.0','-8.748096459E-4'},{'20.0','175.0','-8.755953278E-4+2.707035E-7*T^1-2.244163E-8*T^2+6.167251E-10*T^3-3.816753E-12*T^4+7.857376E-15*T^5'},{'175.0','600.0','-0.001023917418+1.732348E-6*T^1+9.327239E-9*T^2-1.34332E-11*T^3+7.259212E-15*T^4'},{'600.0','3400.0','-0.001392246339+4.688445E-6*T^1-1.397075E-10*T^2+1.944173E-13*T^3'}}"/>
+          <set name="argunit" value="K"/>
+        </func>
+        <set name="alphatan" value="{'10e-6','0','0','0','10e-6','0','0','0','10e-6'}"/>
+        <set name="dL" value="{'(dL_solid_1(T)-dL_solid_1(Tempref))/(1+dL_solid_1(Tempref))','0','0','0','(dL_solid_1(T)-dL_solid_1(Tempref))/(1+dL_solid_1(Tempref))','0','0','0','(dL_solid_1(T)-dL_solid_1(Tempref))/(1+dL_solid_1(Tempref))'}"/>
+        <setPropertyInfo name="dL" info="Reference: G.K. White and R.B. Roberts, &quot;Thermal expansion of reference materials: tungsten and alpha-Al2O3&quot;, High Temperatures-High Pressures, v15, No. 3, p321 (1983); R.R. Kirby, &quot;Thermal expansion of tungsten from 293 to 1800 K&quot;, High Temperatures-High Pressures, v4, No. 4, p459 (1972); F.C. Nix and D. MacNair, &quot;The Thermal Expansion of Pure Metals. II: Molybdenum, Palladium, Silver, Tantalum, Tungsten, Platinum, and Lead&quot;, Physical Review, v61, No. 1-2, p74 (1942) https://doi.org/10.1103/PhysRev.61.74; R.J. Corruccini and J.J. Gniewek, &quot;Thermal Expansion of Technical Solids at Low Temperatures: A Compilation From the Literature&quot;, NBS Monograph 29 (1961) https://digital.library.unt.edu/ark:/67531/metadc70437/&#xa;Note: the reference temperature is 20 &#xb0;C (293 K), T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K), values below -173 &#xb0;C (100 K) were calculated from the Gruneisen correlation&#xa;Reference temperature: 293.00[K]"/>
+        <addInput quantity="temperature"/>
+        <addInput quantity="strainreferencetemperature"/>
+      </propertyGroup>
+      <propertyGroup tag="Enu" type="Enu" descr="Young's modulus and Poisson's ratio">
+        <func tag="E" oper="Piecewise">
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'93.0','273.0','4.118652524E11-4.684246E7*T^1+14228.23*T^2'},{'273.0','2073.0','4.102253405E11-3.489E7*T^1-7550.0*T^2'},{'2073.0','2673.16','3.352622E11+8.595743E7*T^1-48401.79*T^2'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="Pa"/>
+        </func>
+        <func tag="nu" oper="Piecewise">
+          <label label="Piecewise 1"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'273.0','2073.16','0.28005+5.744E-6*T^1+5.4E-9*T^2'}}"/>
+          <set name="argunit" value="K"/>
+        </func>
+        <set name="E" value="E(T)"/>
+        <setPropertyInfo name="E" info="Reference: R. Lowrie and A.M. Gonas, &quot;Single-Crystal Elastic Properties of Tungsten from 24 to 1800 C&quot;, Journal of Applied Physics, v38, No. 11, p4505 (1967) https://doi.org/10.1063/1.1709158; W. Koester, &quot;Die Temperaturabhangigkeit des Elastizitatsmoduls reiner Metalle&quot;, Zeitschrift fuer Metallkunde, v39, No. 1, p1 (1948) https://doi.org/10.1515/ijmr-1948-390101; P.E. Armstrong and H.L. Brown, &quot;Dynamic Young's Modulus Measurements above 1000 C on Some Pure Polycrystalline Metals and Commercial Graphites&quot;, Transactions of the Metallurgical Society of AIME, v230, p962 (1964)&#xa;Note: T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K), values below 0 &#xb0;C (273 K) were decreased by 2% to match the high temperature values, values above 1800 &#xb0;C (2073 K) were decreased by 1.5% to match the lower temperature values"/>
+        <set name="nu" value="nu(T)"/>
+        <setPropertyInfo name="nu" info="Reference: R. Lowrie and A.M. Gonas, &quot;Single-Crystal Elastic Properties of Tungsten from 24 to 1800 C&quot;, Journal of Applied Physics, v38, No. 11, p4505 (1967) https://doi.org/10.1063/1.1709158&#xa;Note: T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K), calculated from E and mu, errors may be large"/>
+        <addInput quantity="temperature"/>
+      </propertyGroup>
+      <propertyGroup tag="KG" type="KG" descr="Bulk modulus and shear modulus">
+        <func tag="mu" oper="Piecewise">
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'273.0','2073.16','1.6028E11-1.456E7*T^1-3280.0*T^2'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="Pa"/>
+        </func>
+        <func tag="kappa" oper="Piecewise">
+          <label label="Piecewise 1"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'273.0','2073.16','3.096341E11-1.329513E7*T^1-5032.95*T^2+1.894485*T^3'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="Pa"/>
+        </func>
+        <set name="K" value="kappa(T)"/>
+        <setPropertyInfo name="K" info="Reference: R. Lowrie and A.M. Gonas, &quot;Single-Crystal Elastic Properties of Tungsten from 24 to 1800 C&quot;, Journal of Applied Physics, v38, No. 11, p4505 (1967) https://doi.org/10.1063/1.1709158&#xa;Note: T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K), calculated from E and mu, errors may be large"/>
+        <set name="G" value="mu(T)"/>
+        <setPropertyInfo name="G" info="Reference: R. Lowrie and A.M. Gonas, &quot;Single-Crystal Elastic Properties of Tungsten from 24 to 1800 C&quot;, Journal of Applied Physics, v38, No. 11, p4505 (1967) https://doi.org/10.1063/1.1709158&#xa;Note: T&#x98;&#x9a; = 3422 &#xb0;C (3695 K), Tbp = 5930 &#xb0;C (6203 K)"/>
+        <addInput quantity="temperature"/>
+      </propertyGroup>
+      <label label="Tungsten [solid,pure]"/>
+      <set name="family" value="custom"/>
+      <set name="customspecular" valueDouble="{0.7843137254901961,0.7843137254901961,0.7843137254901961}"/>
+      <set name="diffuse" value="custom"/>
+      <set name="customdiffuse" valueDouble="{0.7843137254901961,0.7843137254901961,0.7843137254901961}"/>
+      <set name="ambient" value="custom"/>
+      <set name="customambient" valueDouble="{0.7058823529411765,0.7058823529411765,0.7058823529411765}"/>
+      <set name="fresnel" valueDouble="0.9"/>
+      <set name="roughness" valueDouble="0.15"/>
+      <set name="diffusewrap" valueInt="0"/>
+      <set name="reflectance" valueInt="0"/>
+    </material>
+    <material tag="mat4" type="Common" component="">
+      <info tag="Composition"/>
+      <propertyGroup tag="def">
+        <func tag="k_solid_type_I_1" oper="Piecewise">
+          <label label="Piecewise 3"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'2.0','7.986795','0.2222336*T^1-0.2366781*T^2+0.2570788*T^3-0.01076033*T^4'},{'7.986795','36.86063','-24.5+2.270079*T^1+0.5223903*T^2+0.1072118*T^3-0.001894146*T^4'},{'36.86063','93.26788','-5850.0+402.4867*T^1-5.793212*T^2+0.03281008*T^3-6.294155E-5*T^4'},{'93.26788','400.0','7048.674-57.90665*T^1+0.1896031*T^2-1.431429E-4*T^3-4.583308E-7*T^4+7.155103E-10*T^5'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="W/(m*K)"/>
+        </func>
+        <func tag="alpha" oper="Piecewise">
+          <label label="Piecewise 1"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'50.0','550.0','2.837852E-7+9.950631E-10*T^1+6.323706E-12*T^2-5.332194E-15*T^3'},{'550.0','3000.0','-6.842820489E-7+6.055241E-9*T^1-3.003058E-12*T^2+7.581981E-16*T^3-7.62076E-20*T^4'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="1/K"/>
+        </func>
+        <func tag="C_solid_1" oper="Piecewise">
+          <label label="Piecewise 2.1"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'10.0','42.0','0.2001460999766-0.05813938407736*T^1+0.006733066607544*T^2-3.777481677176E-4*T^3+1.218510980558E-5*T^4-1.915674650738E-7*T^5+1.202143413138E-9*T^6'},{'42.0','98.0','14.44981247651-1.538142449804*T^1+0.06774974819296*T^2-0.001559707389974*T^3+2.022966640522E-5*T^4-1.351040605628E-7*T^5+3.704019002247E-10*T^6'},{'98.0','323.0','-307.3781769726+12.69946361142*T^1-0.2109411170825*T^2+0.001794871291093*T^3-7.888846048088E-6*T^4+1.773846445492E-8*T^5-1.592671810106E-11*T^6'},{'323.0','1100.0','-2657.550941096+20.19505327362*T^1-0.04568104894232*T^2+5.858510413296E-5*T^3-4.005869201183E-8*T^4+1.305370230195E-11*T^5-1.35535953921E-15*T^6'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="J/(kg*K)"/>
+        </func>
+        <func tag="HC_solid_1" oper="Piecewise">
+          <label label="Piecewise 3.1"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'10.0','42.0','0.002403954807884-6.983121421984E-4*T^1+8.087086306944E-5*T^2-4.537133244264E-6*T^3+1.463553539144E-7*T^4-2.30091682437E-9*T^5+1.44389445407E-11*T^6'},{'42.0','98.0','0.1735566979702-0.01847462895391*T^1+8.13742224948E-4*T^2-1.873364545703E-5*T^3+2.429785231872E-7*T^4-1.622734871838E-9*T^5+4.448897223904E-12*T^6'},{'98.0','323.0','-3.6919192893+0.1525332574822*T^1-0.002533613757919*T^2+2.155819908034E-5*T^3-9.475292989184E-8*T^4+2.130566966002E-10*T^5-1.912958111334E-13*T^6'},{'323.0','1100.0','-31.91984431958+0.2425627848388*T^1-5.486750787624E-4*T^2+7.036656860952E-7*T^3-4.81144950152E-10*T^4+1.567880184617E-13*T^5-1.627922350265E-17*T^6'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="J/(mol*K)"/>
+        </func>
+        <func tag="rho" oper="Piecewise">
+          <label label="Piecewise 4"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'50.0','600.0','3515.807158+0.004862519*T^1-2.110764E-5*T^2-1.175107E-8*T^3'},{'600.0','3000.0','3520.1-0.001103704*T^1-3.604174E-5*T^2+1.053668E-8*T^3-1.165017E-12*T^4'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="kg/m^3"/>
+        </func>
+        <func tag="TD_solid_type_I_1" oper="Piecewise">
+          <label label="Piecewise 5"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'50.0','400.0','(exp(-2.16206732E-14*T^6 + 3.06752508E-11*T^5 - 1.66308125E-08*T^4 + 4.13729589E-06*T^3 - 3.63170928E-04*T^2 - 4.24550644E-02*T + 1.11468065E+01))*1.000000000000e-04'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="m^2/s"/>
+        </func>
+        <func tag="int13" oper="Interpolation">
+          <label label="Thermal Conductivity - Diamond"/>
+          <set name="funcname" value="k_Dia"/>
+          <set name="table" value="{{'298.15','1811.168875'},{'398.15','1356.272762'},{'498.15','1084.01084'},{'598.15','902.7835827'},{'698.15','773.4727494'},{'798.15','676.5645555'},{'898.15','601.2358737'},{'998.15','541.0008516'},{'1098.15','491.7361016'},{'1198.15','450.6948212'},{'1298.15','415.9765821'},{'1398.15','386.224654'},{'1498.15','360.4445483'},{'1598.15','337.8906861'},{'1698.15','317.9931101'},{'1798.15','300.3086506'},{'1898.15','284.4875273'},{'1998.15','270.2499812'},{'2098.15','257.3695875'},{'2198.15','245.6611241'},{'2298.15','234.9716076'},{'2398.15','225.1735713'},{'2498.15','216.1599584'},{'2598.15','207.840194'},{'2698.15','200.137131'},{'2798.15','192.9846506'},{'2898.15','186.3257595'},{'2998.15','180.1110685'},{'3098.15','174.2975647'},{'3198.15','168.847615'},{'3298.15','163.7281506'},{'3398.15','158.9099951'},{'3498.15','154.3673084'},{'3598.15','150.077123'},{'3698.15','146.0189554'},{'3798.15','142.1744797'}}"/>
+          <set name="fununit" value="{'W/(m*K)'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int14" oper="Interpolation">
+          <label label="Specific Heat Capacity - Diamond"/>
+          <set name="funcname" value="Cp_Dia"/>
+          <set name="table" value="{{'298.15','502'},{'398.15','510.6293224'},{'498.15','520.4667333'},{'598.15','531.3920635'},{'698.15','543.2851432'},{'798.15','556.025803'},{'898.15','569.4938735'},{'998.15','583.569185'},{'1098.15','598.131568'},{'1198.15','613.0608532'},{'1298.15','628.2368708'},{'1398.15','643.5394515'},{'1498.15','658.8484257'},{'1598.15','674.043624'},{'1698.15','689.0048767'},{'1798.15','703.6120144'},{'1898.15','717.7448675'},{'1998.15','731.2832667'},{'2098.15','744.1070422'},{'2198.15','756.0960247'},{'2298.15','767.1300446'},{'2398.15','777.0889325'},{'2498.15','785.8525187'},{'2598.15','793.3006338'},{'2698.15','799.3131083'},{'2798.15','803.7697726'},{'2898.15','806.5504573'},{'2998.15','807.5349928'},{'3098.15','806.6032097'},{'3198.15','803.6349384'},{'3298.15','798.5100093'},{'3398.15','791.1082531'},{'3498.15','781.3095001'},{'3598.15','768.9935809'},{'3698.15','754.0403259'},{'3798.15','736.3295657'}}"/>
+          <set name="fununit" value="{'J/(kg*K)'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int15" oper="Interpolation">
+          <label label="Density - Diamond"/>
+          <set name="funcname" value="rho_Dia"/>
+          <set name="table" value="{{'298.15','3515'},{'398.15','3513.945816'},{'498.15','3512.892265'},{'598.15','3511.839345'},{'698.15','3510.787056'},{'798.15','3509.735397'},{'898.15','3508.684368'},{'998.15','3507.633969'},{'1098.15','3506.584198'},{'1198.15','3505.535055'},{'1298.15','3504.48654'},{'1398.15','3503.438652'},{'1498.15','3502.391391'},{'1598.15','3501.344755'},{'1698.15','3500.298745'},{'1798.15','3499.25336'},{'1898.15','3498.208599'},{'1998.15','3497.164461'},{'2098.15','3496.120947'},{'2198.15','3495.078055'},{'2298.15','3494.035785'},{'2398.15','3492.994137'},{'2498.15','3491.953109'},{'2598.15','3490.912702'},{'2698.15','3489.872915'},{'2798.15','3488.833747'},{'2898.15','3487.795197'},{'2998.15','3486.757266'},{'3098.15','3485.719952'},{'3198.15','3484.683256'},{'3298.15','3483.647175'},{'3398.15','3482.611711'},{'3498.15','3481.576862'},{'3598.15','3480.542628'},{'3698.15','3479.509008'},{'3798.15','3478.476002'}}"/>
+          <set name="fununit" value="{'kg/m^3'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <func tag="int16" oper="Interpolation">
+          <label label="Thermal Diffusivity - Diamond"/>
+          <set name="funcname" value="alpha_Dia"/>
+          <set name="table" value="{{'298.15','0.001026431'},{'398.15','0.000755868'},{'498.15','0.000592892'},{'598.15','0.000483764'},{'698.15','0.00040552'},{'798.15','0.000346689'},{'898.15','0.000300893'},{'998.15','0.000264296'},{'1098.15','0.00023445'},{'1198.15','0.000209713'},{'1298.15','0.000188939'},{'1398.15','0.000171305'},{'1498.15','0.000156203'},{'1598.15','0.00014317'},{'1698.15','0.000131853'},{'1798.15','0.000121972'},{'1898.15','0.000113305'},{'1998.15','0.000105673'},{'2098.15','9.89317E-05'},{'2198.15','9.29614E-05'},{'2298.15','8.76635E-05'},{'2398.15','8.29562E-05'},{'2498.15','7.87709E-05'},{'2598.15','7.50504E-05'},{'2698.15','7.17466E-05'},{'2798.15','6.88194E-05'},{'2898.15','6.62354E-05'},{'2998.15','6.39672E-05'},{'3098.15','6.19925E-05'},{'3198.15','6.02938E-05'},{'3298.15','5.88585E-05'},{'3398.15','5.7678E-05'},{'3498.15','5.67487E-05'},{'3598.15','5.60718E-05'},{'3698.15','5.5654E-05'},{'3798.15','5.55086E-05'}}"/>
+          <set name="fununit" value="{'m^2/s'}"/>
+          <set name="argunit" value="{'K'}"/>
+        </func>
+        <set name="thermalconductivity" value="{'k_Dia(T)','0','0','0','k_Dia(T)','0','0','0','k_Dia(T)'}"/>
+        <setPropertyInfo name="thermalconductivity" info="Reference: C.Y. Ho, R.W. Powell, and P.E. Liley, &quot;Thermal Conductivity of the Elements&quot;, Journal of Physical and Chemical Reference Data, v1, No. 2, p279 (1972) https://srd.nist.gov/JPCRD/jpcrd7.pdf&#xa;Note: type I diamond"/>
+        <set name="thermalexpansioncoefficient" value="{'(alpha(T)+(Tempref-293[K])*if(abs(T-Tempref)&gt;1e-3,(alpha(T)-alpha(Tempref))/(T-Tempref),d(alpha(T),T)))/(1+alpha(Tempref)*(Tempref-293[K]))','0','0','0','(alpha(T)+(Tempref-293[K])*if(abs(T-Tempref)&gt;1e-3,(alpha(T)-alpha(Tempref))/(T-Tempref),d(alpha(T),T)))/(1+alpha(Tempref)*(Tempref-293[K]))','0','0','0','(alpha(T)+(Tempref-293[K])*if(abs(T-Tempref)&gt;1e-3,(alpha(T)-alpha(Tempref))/(T-Tempref),d(alpha(T),T)))/(1+alpha(Tempref)*(Tempref-293[K]))'}"/>
+        <setPropertyInfo name="thermalexpansioncoefficient" info="Reference: R.R. Reeber and K. Wang, &quot;Thermal expansion, molar volume and specific heat of diamond from 0 to 3000 K&quot;, Journal of Electronic Materials, v25, No. 1, p63 (1996) https://doi.org/10.1007/BF02666175&#xa;Note: the reference temperature is 20 &#xb0;C (293 K), type II&#xa;Reference temperature: 293.00[K]"/>
+        <set name="heatcapacity" value="Cp_Dia(T)"/>
+        <setPropertyInfo name="heatcapacity" info="Reference: L.B. Pankratz, &quot;Thermodynamic Properties of Elements and Oxides&quot;, US Bureau of Mines Bulletin 672 (1982) https://books.google.com/books?id=X4RZF_Vdm-oC; V.J. Johnson, &quot;A Compendium of The Properties of Materials At Low Temperature (PHASE 1) Part 2. Properties of Solids&quot;, WADD TR 60-56, Part 2, AD0249786 (1960) https://contrails.library.iit.edu/item/158048&#xa;Note: data from Pankratz was multiplied by 1.1 to match the low temperature data from Johnson"/>
+        <set name="HC" value="HC_solid_1(T)"/>
+        <setPropertyInfo name="HC" info="Reference: L.B. Pankratz, &quot;Thermodynamic Properties of Elements and Oxides&quot;, US Bureau of Mines Bulletin 672 (1982) https://books.google.com/books?id=X4RZF_Vdm-oC; V.J. Johnson, &quot;A Compendium of The Properties of Materials At Low Temperature (PHASE 1) Part 2. Properties of Solids&quot;, WADD TR 60-56, Part 2, AD0249786 (1960) https://contrails.library.iit.edu/item/158048&#xa;Note: data from Pankratz was multiplied by 1.1 to match the low temperature data from Johnson"/>
+        <set name="density" value="rho_Dia(T)"/>
+        <setPropertyInfo name="density" info="Reference: R.R. Reeber and K. Wang, &quot;Thermal expansion, molar volume and specific heat of diamond from 0 to 3000 K&quot;, Journal of Electronic Materials, v25, No. 1, p63 (1996) https://doi.org/10.1007/BF02666175&#xa;Note: type II, calculated from the linear expansion and the room temperature density"/>
+        <set name="TD" value="TD_solid_type_I_1(T)"/>
+        <setPropertyInfo name="TD" info="Reference: see the references for the thermal conductivity, specific heat, and density&#xa;Note: type I diamond, calculated from the thermal conductivity, specific heat, and density"/>
+        <addInput quantity="temperature"/>
+        <addInput quantity="strainreferencetemperature"/>
+      </propertyGroup>
+      <propertyGroup tag="ThermalExpansion" type="ThermalExpansion" descr="Thermal expansion">
+        <func tag="dL" oper="Piecewise">
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'50.0','650.0','-8.93729842E-5+1.273287E-7*T^1-2.097373E-9*T^2+1.314565E-11*T^3-1.543687E-14*T^4+7.053304E-18*T^5'},{'650.0','3000.0','-4.692379309E-4+7.778471E-8*T^1+3.430906E-9*T^2-9.835072E-13*T^3+1.086849E-16*T^4'}}"/>
+          <set name="argunit" value="K"/>
+        </func>
+        <func tag="CTE" oper="Piecewise">
+          <label label="Piecewise 1"/>
+          <set name="arg" value="T"/>
+          <set name="pieces" value="{{'50.0','250.0','1.09127E-10+8.60664E-10*T^1-2.312028E-11*T^2+2.430852E-13*T^3-4.756667E-16*T^4'},{'250.0','600.0','-1.366956441E-8-1.431996E-9*T^1+2.304629E-11*T^2-2.466316E-14*T^3+6.919205E-18*T^4'},{'600.0','3000.0','-3.280968491E-6+1.714504E-8*T^1-1.453972E-11*T^2+6.493022E-15*T^3-1.477177E-18*T^4+1.347315E-22*T^5'}}"/>
+          <set name="argunit" value="K"/>
+          <set name="fununit" value="1/K"/>
+        </func>
+        <set name="alphatan" value="{'CTE(T)','0','0','0','CTE(T)','0','0','0','CTE(T)'}"/>
+        <setPropertyInfo name="alphatan" info="Reference: R.R. Reeber and K. Wang, &quot;Thermal expansion, molar volume and specific heat of diamond from 0 to 3000 K&quot;, Journal of Electronic Materials, v25, No. 1, p63 (1996) https://doi.org/10.1007/BF02666175&#xa;Note: type II"/>
+        <set name="dL" value="{'(dL(T)-dL(Tempref))/(1+dL(Tempref))','0','0','0','(dL(T)-dL(Tempref))/(1+dL(Tempref))','0','0','0','(dL(T)-dL(Tempref))/(1+dL(Tempref))'}"/>
+        <setPropertyInfo name="dL" info="Reference: R.R. Reeber and K. Wang, &quot;Thermal expansion, molar volume and specific heat of diamond from 0 to 3000 K&quot;, Journal of Electronic Materials, v25, No. 1, p63 (1996) https://doi.org/10.1007/BF02666175&#xa;Note: the reference temperature is 20 &#xb0;C (293 K), type II&#xa;Reference temperature: 293.00[K]"/>
+        <addInput quantity="temperature"/>
+        <addInput quantity="strainreferencetemperature"/>
+      </propertyGroup>
+      <label label="C (diamond) [solid,type I]"/>
+      <set name="info" value="{{'Composition','Composition','100 C (wt %) or 100 C (at %), MW = 12.011 g/mol'}}"/>
+    </material>
+  </model>
+</archive>
+
