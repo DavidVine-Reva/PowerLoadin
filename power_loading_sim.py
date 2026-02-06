@@ -302,18 +302,9 @@ class RotatingAnodeSimulation:
         print("    Creating mesh container...")
         mesh = comp.mesh().create("mesh1")
         
-        # Set overall mesh size first
-        print("    Setting global mesh size...")
-        mesh.feature("size").set("hauto", "5")  # Medium overall
-        
-        # Fine mesh for anode layer (domain 2)
-        print("    Creating fine mesh size for anode...")
-        size_fine = mesh.create("size_anode", "Size")
-        size_fine.label("Anode Fine Mesh")
-        size_fine.set("hauto", "2")  # Fine
-        size_fine.selection().geom("geom1", 3)
-        print("    Setting anode domain selection...")
-        size_fine.selection().set([2])
+        # For debugging: use very coarse mesh everywhere
+        print("    Setting global mesh size (coarse for debugging)...")
+        mesh.feature("size").set("hauto", "7")  # Very coarse for fast debugging
         
         # Free tetrahedral mesh
         print("    Creating free tetrahedral mesh...")
@@ -373,65 +364,24 @@ class RotatingAnodeSimulation:
         
     def _add_time_step_events(self, sol) -> None:
         """
-        Add events to control time stepping based on beam state.
+        Configure time stepping for the simulation.
         
-        Uses COMSOL's explicit event interface to define transition times
-        at beam on/off points with different time step sizes.
+        For now, use simple uniform time stepping for debugging.
+        Complex event-based stepping can be added later.
         """
-        model = self.java
-        comp = model.component("comp1")
+        print("    Configuring time stepping...")
         
-        # Create explicit events for time step control
-        # Event 1: Beam turns on (start of each period) - use fine time steps
-        # Event 2: Beam turns off (after t_on) - switch to coarse time steps
-        
-        events = comp.physics().create("ev", "Events", "geom1")
-        events.label("Beam On/Off Events")
-        
-        # Explicit event at beam turn-on times (t = n * T_period)
-        beam_on_event = events.create("expl1", "ExplicitEvent")
-        beam_on_event.label("Beam On")
-        # Trigger at start of each period
-        beam_on_event.set("trigger", "mod(t, T_period) < 1e-9")
-        
-        # Explicit event at beam turn-off times (t = n * T_period + t_on)
-        beam_off_event = events.create("expl2", "ExplicitEvent")
-        beam_off_event.label("Beam Off")
-        # Trigger when beam turns off
-        beam_off_event.set("trigger", "abs(mod(t, T_period) - t_on) < 1e-9")
-        
-        # Configure time stepping in solver to respect events
-        # Use event-based time stepping
-        sol.feature("t1").set("eventtol", 1e-6)
-        sol.feature("t1").set("eventout", True)
-        
-        # Set up output times to capture both beam-on and beam-off periods
-        # Generate explicit output times for first few periods for analysis
+        # For debugging: just use uniform coarse time steps
+        # Skip complex event system until basic simulation works
         n_periods = N_PERIODS_MIN
-        output_times = []
-        for n in range(n_periods):
-            t_start = n * PERIOD
-            # Fine output during beam-on
-            t_on_end = t_start + self.beam_on_time
-            dt_fine = DT_BEAM_ON
-            t = t_start
-            while t <= t_on_end:
-                output_times.append(t)
-                t += dt_fine
-            # Coarse output during beam-off
-            t_off_end = (n + 1) * PERIOD
-            dt_coarse = DT_BEAM_OFF
-            t = t_on_end + dt_coarse
-            while t < t_off_end:
-                output_times.append(t)
-                t += dt_coarse
+        total_time = n_periods * PERIOD
         
-        # Add final time
-        output_times.append(n_periods * PERIOD)
-        
-        # Set output times list
-        times_str = " ".join([f"{t:.9f}" for t in output_times])
+        # Use simple uniform output times (coarse for debugging)
+        dt_output = PERIOD / 10  # 10 points per period for debugging
+        times_str = f"range(0, {dt_output}, {total_time})"
         sol.feature("t1").set("tlist", times_str)
+        
+        print(f"    Time stepping: {n_periods} periods, dt={dt_output*1e6:.1f} μs")
         
     def solve(self) -> None:
         """Run the simulation."""
