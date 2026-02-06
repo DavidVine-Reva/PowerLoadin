@@ -293,14 +293,14 @@ class RotatingAnodeSimulation:
         # Coarse tetrahedral mesh for substrate
         size_coarse = mesh.create("size_coarse", "Size")
         size_coarse.label("Coarse Size")
-        size_coarse.set("hauto", 4)  # Coarse predefined size
+        size_coarse.set("hauto", "4")  # Coarse predefined size (string to avoid Java overload)
         size_coarse.selection().geom("geom1", 3)
         size_coarse.selection().set([1])  # Substrate domain
         
         # Fine mesh for anode layer
         size_fine = mesh.create("size_fine", "Size")
         size_fine.label("Fine Size - Anode")
-        size_fine.set("hauto", 2)  # Fine predefined size
+        size_fine.set("hauto", "2")  # Fine predefined size
         size_fine.selection().geom("geom1", 3)
         size_fine.selection().set([2])  # Anode domain
         
@@ -317,7 +317,7 @@ class RotatingAnodeSimulation:
         
         size_track = mesh.create("size_track", "Size")
         size_track.label("Extra Fine - Track")
-        size_track.set("hauto", 1)  # Extra fine
+        size_track.set("hauto", "1")  # Extra fine
         size_track.selection().geom("geom1", 3)
         size_track.selection().named("mesh1_box1")
         
