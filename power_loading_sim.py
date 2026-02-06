@@ -357,8 +357,8 @@ class RotatingAnodeSimulation:
         # Add events for time step control
         self._add_time_step_events(sol)
         
-        # Configure solver settings
-        sol.feature("t1").set("maxorder", 2)
+        # Configure solver settings (use strings to avoid Java overload ambiguity)
+        sol.feature("t1").set("maxorder", "2")
         sol.feature("t1").set("estrat", "exclude")
         sol.feature("t1").set("tstepsbdf", "free")
         
