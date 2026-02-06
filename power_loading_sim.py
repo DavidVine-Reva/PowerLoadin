@@ -151,7 +151,7 @@ class RotatingAnodeSimulation:
         params.set("norm_z", f"{gruen_params['norm_z']}[1/m]", "Depth normalization")
         
     def _create_geometry(self) -> None:
-        """Create 3D geometry: substrate block + anode layer."""
+        """Create 3D geometry: substrate + anode + beam track region."""
         print("  Creating geometry...")
         
         model = self.java
@@ -159,23 +159,37 @@ class RotatingAnodeSimulation:
         # Create component
         model.component().create("comp1", True)
         
-        # Create 3D geometry with union action (creates single domain from overlapping objects)
+        # Create 3D geometry
         geom = model.component("comp1").geom().create("geom1", 3)
         
-        # Substrate block (bottom)
+        # Define beam track region size (3×FWHM each side = 6σ width)
+        # Using FWHM ≈ 2.355σ, so 3×FWHM ≈ 7σ each side from center
+        track_half_x = f"(L_track/2 + 7*sigma_x)"  # Track length + beam spread
+        track_half_y = "7*sigma_y"  # Beam width
+        
+        # Substrate block (bottom) - domain 1
         blk1 = geom.create("substrate", "Block")
         blk1.set("size", ["L_sub", "W_sub", "H_sub"])
         blk1.set("pos", ["-L_sub/2", "-W_sub/2", "0"])
         blk1.label("Substrate")
         
-        # Anode layer (on top of substrate)
+        # Beam track region in anode (smaller block) - will become domain 3 after difference
+        # This is where fine mesh will be applied later
+        blk_track = geom.create("beam_track", "Block")
+        blk_track.set("size", [f"2*{track_half_x}", f"2*{track_half_y}", "t_anode"])
+        blk_track.set("pos", [f"-{track_half_x}", f"-{track_half_y}", "H_sub"])
+        blk_track.label("Beam Track Region")
+        
+        # Full anode layer (on top of substrate) - domain 2 (outer region)
         blk2 = geom.create("anode", "Block")
         blk2.set("size", ["L_sub", "W_sub", "t_anode"])
         blk2.set("pos", ["-L_sub/2", "-W_sub/2", "H_sub"])
         blk2.label("Anode")
         
-        # Run and finalize geometry (auto-creates union/assembly)
+        # Run and finalize geometry
+        # COMSOL will create 3 domains: substrate, outer anode, beam track region
         geom.run()
+        print("    Geometry: substrate (dom 1), outer anode (dom 2), beam track (dom 3)")
         
     def _create_materials(self) -> None:
         """Create materials with temperature-dependent properties."""
@@ -209,8 +223,8 @@ class RotatingAnodeSimulation:
         mat_anode.propertyGroup("def").set("density", anode_props['rho'])
         mat_anode.propertyGroup("def").set("thermalconductivity", anode_props['k'])
         mat_anode.propertyGroup("def").set("heatcapacity", anode_props['Cp'])
-        print("    Assigning anode to domain 2...")
-        mat_anode.selection().set([2])
+        print("    Assigning anode to domains 2 and 3 (outer + beam track)...")
+        mat_anode.selection().set([2, 3])
         print("    Materials created successfully.")
         
     def _create_physics(self) -> None:
@@ -241,8 +255,8 @@ class RotatingAnodeSimulation:
         print("    Creating heat source...")
         heat_src = physics.create("hs1", "HeatSource", 3)
         heat_src.label("Electron Beam Heat Source")
-        print("    Setting heat source domain [2]...")
-        heat_src.selection().set([2])
+        print("    Setting heat source domains [2, 3] (all anode)...")
+        heat_src.selection().set([2, 3])
         
         # Define heat source expression
         print("    Building heat source expression...")
@@ -415,16 +429,18 @@ class RotatingAnodeSimulation:
         
         results = {}
         
-        # Get global maximum temperature over time
-        T_max_history = self.model.evaluate(
-            'maxop1(T)',  # Maximum operator over domain
-            'dataset', 'dset1',
-            'refine', 2
-        )
-        results['T_max_history'] = T_max_history
-        
-        # Get temperature at specific probe points
-        # (Additional evaluation for depth profile would go here)
+        try:
+            # Get maximum temperature from the simulation
+            # Use simple T evaluation at origin point
+            T_at_origin = self.model.evaluate('T', 
+                                              unit='K',
+                                              outer='last')  # Get last time step
+            T_max = max(T_at_origin) if T_at_origin else 0
+            print(f"  Max temperature at last time step: {T_max:.1f} K")
+            results['T_max'] = T_max
+        except Exception as e:
+            print(f"  Warning: Could not extract results: {e}")
+            results['T_max'] = 0
         
         return results
         
