@@ -185,27 +185,33 @@ class RotatingAnodeSimulation:
         comp = model.component("comp1")
         
         # Create material container
+        print("    Getting material container...")
         mat_cont = comp.material()
         
         # Substrate material
+        print(f"    Creating substrate material ({self.substrate_material})...")
         sub_props = get_comsol_material_definition(self.substrate_material)
+        print(f"      rho={sub_props['rho']}, k={sub_props['k']}, Cp={sub_props['Cp']}")
         mat_sub = mat_cont.create("mat_substrate", "Common")
         mat_sub.label("Substrate Material")
         mat_sub.propertyGroup("def").set("density", sub_props['rho'])
         mat_sub.propertyGroup("def").set("thermalconductivity", sub_props['k'])
         mat_sub.propertyGroup("def").set("heatcapacity", sub_props['Cp'])
-        # Assign to substrate domain (domain 1 or selection)
+        print("    Assigning substrate to domain 1...")
         mat_sub.selection().set([1])
         
         # Anode material
+        print(f"    Creating anode material ({self.anode_material}, degraded={self.degraded})...")
         anode_props = get_comsol_material_definition(self.anode_material, self.degraded)
+        print(f"      rho={anode_props['rho']}, k={anode_props['k']}, Cp={anode_props['Cp']}")
         mat_anode = mat_cont.create("mat_anode", "Common")
         mat_anode.label("Anode Material")
         mat_anode.propertyGroup("def").set("density", anode_props['rho'])
         mat_anode.propertyGroup("def").set("thermalconductivity", anode_props['k'])
         mat_anode.propertyGroup("def").set("heatcapacity", anode_props['Cp'])
-        # Assign to anode domain (domain 2 or selection)
+        print("    Assigning anode to domain 2...")
         mat_anode.selection().set([2])
+        print("    Materials created successfully.")
         
     def _create_physics(self) -> None:
         """Set up Heat Transfer physics interface."""
@@ -215,30 +221,35 @@ class RotatingAnodeSimulation:
         comp = model.component("comp1")
         
         # Create Heat Transfer in Solids physics
+        print("    Creating Heat Transfer physics...")
         physics = comp.physics().create("ht", "HeatTransfer", "geom1")
         physics.label("Heat Transfer")
         
         # Initial temperature
+        print("    Setting initial temperature...")
         physics.feature("init1").set("Tinit", "T_ambient")
         
         # Fixed temperature boundary condition (sides and bottom)
+        print("    Creating temperature boundary condition...")
         temp_bc = physics.create("temp1", "TemperatureBoundary", 2)
         temp_bc.label("Fixed Temperature BCs")
         temp_bc.set("T0", "T_ambient")
-        # Select bottom and side boundaries (need to identify boundary numbers)
-        # In a 2-block geometry, typically boundaries 1-5 are bottom/sides
-        # This may need adjustment based on actual geometry
+        print("    Setting boundary selection [1,2,3,4,5]...")
         temp_bc.selection().set([1, 2, 3, 4, 5])
         
         # Heat source in anode region
+        print("    Creating heat source...")
         heat_src = physics.create("hs1", "HeatSource", 3)
         heat_src.label("Electron Beam Heat Source")
-        # Heat source only in anode domain
+        print("    Setting heat source domain [2]...")
         heat_src.selection().set([2])
         
         # Define heat source expression
+        print("    Building heat source expression...")
         heat_expr = self._build_heat_source_expression()
+        print(f"    Heat source expression length: {len(heat_expr)} chars")
         heat_src.set("Q0", heat_expr)
+        print("    Physics created successfully.")
         
     def _build_heat_source_expression(self) -> str:
         """
@@ -282,50 +293,39 @@ class RotatingAnodeSimulation:
         return Q_expr
         
     def _create_mesh(self) -> None:
-        """Create adaptive mesh with refinement in heat source region."""
+        """Create adaptive mesh with refinement in anode region."""
         print("  Creating mesh...")
         
         model = self.java
         comp = model.component("comp1")
         
+        print("    Creating mesh container...")
         mesh = comp.mesh().create("mesh1")
         
-        # Coarse tetrahedral mesh for substrate
-        size_coarse = mesh.create("size_coarse", "Size")
-        size_coarse.label("Coarse Size")
-        size_coarse.set("hauto", "4")  # Coarse predefined size (string to avoid Java overload)
-        size_coarse.selection().geom("geom1", 3)
-        size_coarse.selection().set([1])  # Substrate domain
+        # Set overall mesh size first
+        print("    Setting global mesh size...")
+        mesh.feature("size").set("hauto", "5")  # Medium overall
         
-        # Fine mesh for anode layer
-        size_fine = mesh.create("size_fine", "Size")
-        size_fine.label("Fine Size - Anode")
-        size_fine.set("hauto", "2")  # Fine predefined size
+        # Fine mesh for anode layer (domain 2)
+        print("    Creating fine mesh size for anode...")
+        size_fine = mesh.create("size_anode", "Size")
+        size_fine.label("Anode Fine Mesh")
+        size_fine.set("hauto", "2")  # Fine
         size_fine.selection().geom("geom1", 3)
-        size_fine.selection().set([2])  # Anode domain
-        
-        # Extra fine in heat track region
-        # Create a box selection for the track region
-        box = mesh.create("box1", "Box")
-        box.label("Heat Track Region")
-        box.set("xmin", "-L_track/2 - 3*sigma_x")
-        box.set("xmax", "L_track/2 + 3*sigma_x")
-        box.set("ymin", "-3*sigma_y")
-        box.set("ymax", "3*sigma_y")
-        box.set("zmin", "H_sub")
-        box.set("zmax", "H_sub + t_anode")
-        
-        size_track = mesh.create("size_track", "Size")
-        size_track.label("Extra Fine - Track")
-        size_track.set("hauto", "1")  # Extra fine
-        size_track.selection().geom("geom1", 3)
-        size_track.selection().named("mesh1_box1")
+        print("    Setting anode domain selection...")
+        size_fine.selection().set([2])
         
         # Free tetrahedral mesh
+        print("    Creating free tetrahedral mesh...")
         ftet = mesh.create("ftet1", "FreeTet")
         
         # Build mesh
-        mesh.run()
+        print("    Building mesh...")
+        try:
+            mesh.run()
+            print("    Mesh built successfully.")
+        except Exception as e:
+            print(f"    Mesh build failed: {e}")
         
     def _create_study(self) -> None:
         """Create time-dependent study with events."""
