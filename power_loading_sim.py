@@ -384,6 +384,8 @@ class RotatingAnodeSimulation:
         
         Creates an Events interface with discrete state for beam on/off,
         and explicit events at beam transition times.
+        
+        Based on example from run_50cycles_and_check.py
         """
         print("    Configuring time stepping with events...")
         
@@ -392,18 +394,18 @@ class RotatingAnodeSimulation:
         
         # Create Events physics interface for beam state control
         print("    Creating Events interface...")
-        events = comp.physics().create("ev", "Events", "geom1")
-        events.label("Beam State Control")
+        ev = comp.physics().create("ev", "Events", "geom1")
+        ev.label("Beam State Control")
         
         # Create discrete state for beam on/off (0 = off, 1 = on)
+        # The DiscreteStates feature uses a specific API
         print("    Creating discrete state 'beam_state'...")
-        ds = events.create("ds1", "DiscreteStates")
+        ds = ev.feature().create("ds1", "DiscreteStates")
         ds.label("Beam State")
-        # DiscreteStates uses table format: name in first column, initial value (u0) in second
-        # Set the first row with index 0
-        ds.setIndex("dimExpr", "1", 0)  # Number of states = 1
-        ds.setIndex("name", "beam_state", 0)  # State name
-        ds.setIndex("u0", "1", 0)  # Initial value = 1 (beam on at t=0)
+        # Try setting the state via the property table
+        # Each row defines: name, initial value
+        ds.set("stateName", ["beam_state"])
+        ds.set("initialState", ["1"])
         
         # Get timing parameters for debug output
         n_periods = N_PERIODS_MIN
@@ -416,69 +418,57 @@ class RotatingAnodeSimulation:
         print(f"      Number of periods: {n_periods}")
         
         # Create explicit events for beam on and beam off times
-        # Build list of event times
-        event_on_times = []
-        event_off_times = []
+        # Following the pattern from run_50cycles_and_check.py
+        event_num = 1
+        
         for n in range(n_periods):
-            t_beam_on = n * t_period
             t_beam_off = n * t_period + t_on
-            if t_beam_on > 0:  # Skip t=0 since beam starts on
-                event_on_times.append(t_beam_on)
-            event_off_times.append(t_beam_off)
+            t_beam_on_next = (n + 1) * t_period
+            
+            # Beam OFF event
+            print(f"      Event {event_num}: beam OFF at t={t_beam_off*1e6:.2f} μs")
+            tag_off = f"expl{event_num}"
+            ev.feature().create(tag_off, "ExplicitEvent")
+            f_off = ev.feature(tag_off)
+            f_off.set("start", f"{t_beam_off:.9g}")
+            f_off.set("reInitName", "beam_state")
+            f_off.set("reInitValue", "0")
+            event_num += 1
+            
+            # Beam ON event (except after last cycle)
+            if n < n_periods - 1:
+                print(f"      Event {event_num}: beam ON at t={t_beam_on_next*1e6:.2f} μs")
+                tag_on = f"expl{event_num}"
+                ev.feature().create(tag_on, "ExplicitEvent")
+                f_on = ev.feature(tag_on)
+                f_on.set("start", f"{t_beam_on_next:.9g}")
+                f_on.set("reInitName", "beam_state")
+                f_on.set("reInitValue", "1")
+                event_num += 1
         
-        print(f"    Creating {len(event_off_times)} beam-off events...")
-        # Beam OFF events - set beam_state to 0
-        for i, t_off in enumerate(event_off_times):
-            ev_off = events.create(f"exev_off{i}", "ExplicitEvent")
-            ev_off.label(f"Beam Off at t={t_off*1e6:.1f}μs")
-            ev_off.set("start", f"{t_off}")
-            ev_off.set("period", "0")  # One-shot, no repeat
-            # Reinitialize beam_state to 0 (off)
-            ev_off.setIndex("reinit", "beam_state", 0)
-            ev_off.setIndex("reinitexpr", "0", 0)
+        print(f"    Created {event_num - 1} events")
         
-        if event_on_times:
-            print(f"    Creating {len(event_on_times)} beam-on events...")
-            # Beam ON events - set beam_state to 1
-            for i, t_on_ev in enumerate(event_on_times):
-                ev_on = events.create(f"exev_on{i}", "ExplicitEvent")
-                ev_on.label(f"Beam On at t={t_on_ev*1e6:.1f}μs")
-                ev_on.set("start", f"{t_on_ev}")
-                ev_on.set("period", "0")  # One-shot
-                ev_on.setIndex("reinit", "beam_state", 0)
-                ev_on.setIndex("reinitexpr", "1", 0)
+        # Generate output times using range() syntax like the example
+        # During beam-on: fine time steps, during beam-off: coarser steps
+        dt_on = max(t_on / 20.0, 1e-9)  # Fine steps during beam-on
+        dt_off = max((t_period - t_on) / 10.0, 1e-9)  # Coarser during cooling
         
-        # Generate output times to capture beam on/off transitions
-        output_times = []
+        parts = []
         for n in range(n_periods):
-            t_start = n * t_period
-            t_on_end = t_start + t_on
+            t0 = n * t_period
+            t_on_end = t0 + t_on
+            t1 = (n + 1) * t_period
             
-            # During beam-on: key points
-            output_times.append(t_start)
-            output_times.append(t_start + t_on * 0.5)
-            output_times.append(t_on_end - 1e-9)  # Just before beam off
-            output_times.append(t_on_end)  # Exact beam off time
-            output_times.append(t_on_end + 1e-9)  # Just after beam off
-            
-            # During beam-off: key points
-            t_off_duration = t_period - t_on
-            output_times.append(t_on_end + t_off_duration * 0.5)
+            if t_on > 0:
+                parts.append(f"range({t0:.9g},{dt_on:.9g},{t_on_end:.9g})")
+            if (t_period - t_on) > 0:
+                parts.append(f"range({t_on_end:.9g},{dt_off:.9g},{t1:.9g})")
         
-        # Add final time
-        output_times.append(n_periods * t_period)
-        output_times = sorted(set(output_times))
+        tlist_str = " ".join(parts)
+        sol.feature("t1").set("tlist", tlist_str)
         
-        # Set output times
-        times_str = " ".join([f"{t:.12f}" for t in output_times])
-        sol.feature("t1").set("tlist", times_str)
-        
-        # Configure solver to store solutions at events
-        print("    Configuring solver for event handling...")
-        sol.feature("t1").set("eventtol", "1e-6")
-        sol.feature("t1").set("eventout", "true")  # Store solutions at events
-        
-        print(f"    Time stepping: {n_periods} periods, {len(output_times)} output points")
+        print(f"    Time stepping: {n_periods} periods")
+        print(f"    dt_on = {dt_on*1e9:.1f} ns, dt_off = {dt_off*1e6:.2f} μs")
         print(f"    Total simulation time: {n_periods * t_period * 1e3:.2f} ms")
         
     def solve(self) -> None:
