@@ -514,10 +514,24 @@ class RotatingAnodeSimulation:
             T_max_history = []
             
             if hasattr(T_all, 'shape') and len(T_all.shape) > 1:
-                # 2D array: [space, time] or [time, space]
-                for i in range(T_all.shape[-1]):  # Iterate over time
-                    T_at_t = T_all[..., i] if T_all.shape[-1] == len(times) else T_all[i, ...]
-                    T_max_history.append(float(np.max(T_at_t)))
+                n_times = len(times)
+                # Determine which axis corresponds to time
+                if T_all.shape[-1] == n_times:
+                    # Shape is [space, time]
+                    for i in range(n_times):
+                        T_max_history.append(float(np.max(T_all[..., i])))
+                elif T_all.shape[0] == n_times:
+                    # Shape is [time, space]
+                    for i in range(n_times):
+                        T_max_history.append(float(np.max(T_all[i, ...])))
+                else:
+                    # Unknown shape or mismatch - this might happen if output time steps differ from request
+                    # Fallback: try to match by accumulating whatever we can, or just take global max
+                    print(f"  Warning: Unexpected T_all shape {T_all.shape} for {n_times} time points")
+                    # Try iterating over last axis as best guess if it matches nothing
+                    steps = T_all.shape[-1]
+                    for i in range(steps):
+                        T_max_history.append(float(np.max(T_all[..., i])))
             else:
                 # Scalar or 1D - just one value
                 T_max_history = [float(np.max(T_all))]
