@@ -6,7 +6,7 @@ import mph
 
 print("Loading COMSOL model...")
 client = mph.start()
-model = client.load("rotating_anode_heat_transfer_Mo_99um.mph")
+model = client.load("rotating_anode_heat_transfer_Mo_10um.mph")
 J = model.java
 
 print("\n=== INSPECTING EVENTS INTERFACE ===")
@@ -16,7 +16,7 @@ physics = comp.physics()
 # List all physics interfaces
 print("\nPhysics interfaces:")
 for tag in physics.tags():
-    phy = physics.feature(str(tag))
+    phy = physics.get(str(tag))
     print(f"  {tag}: {phy.getType()}")
 
 # Check if events interface exists
