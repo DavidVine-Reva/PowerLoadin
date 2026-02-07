@@ -398,14 +398,12 @@ class RotatingAnodeSimulation:
         ev.label("Beam State Control")
         
         # Create discrete state for beam on/off (0 = off, 1 = on)
-        # The DiscreteStates feature uses a specific API
+        # From inspection of working MPH: use 'dim' for state name, 'dimInit' for initial value
         print("    Creating discrete state 'beam_state'...")
         ds = ev.feature().create("ds1", "DiscreteStates")
         ds.label("Beam State")
-        # Try setting the state via the property table
-        # Each row defines: name, initial value
-        ds.set("stateName", ["beam_state"])
-        ds.set("initialState", ["1"])
+        ds.set("dim", "beam_state")  # State variable name
+        ds.set("dimInit", "1")  # Initial value = 1 (beam on at t=0)
         
         # Get timing parameters for debug output
         n_periods = N_PERIODS_MIN
