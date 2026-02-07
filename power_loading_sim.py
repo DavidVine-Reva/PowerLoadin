@@ -473,8 +473,11 @@ class RotatingAnodeSimulation:
     def solve(self) -> None:
         """Run the simulation."""
         print("Running simulation...")
+        import time
+        t0 = time.time()
         self.model.solve()
-        print("Simulation complete.")
+        dt = time.time() - t0
+        print(f"Simulation complete in {dt:.1f} seconds.")
         
     def get_results(self) -> Dict[str, Any]:
         """Extract results from the simulation including temperature history."""
