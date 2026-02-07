@@ -24,6 +24,7 @@ import argparse
 import math
 import sys
 from typing import Optional, Tuple, Dict, Any
+import numpy as np
 
 try:
     import mph
