@@ -49,7 +49,7 @@ T_MELTING = {        # Melting points in K
 # =============================================================================
 # Simulation Parameters
 # =============================================================================
-N_PERIODS_MIN = 10           # Minimum periods to run for equilibrium
+N_PERIODS_MIN = 50           # Minimum periods to run for equilibrium
 N_PERIODS_MAX = 100          # Maximum periods before giving up
 DT_BEAM_ON = 1e-6            # Time step during beam-on (1 μs)
 DT_BEAM_OFF = 100e-6          # Time step during beam-off (10 μs)
