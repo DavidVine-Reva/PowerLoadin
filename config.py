@@ -62,7 +62,7 @@ POWER_MIN = 1.0              # Minimum power to search
 POWER_MAX = 2000.0          # Maximum power to search
 POWER_TOLERANCE = 0.01       # Relative tolerance for power convergence
 TEMP_TOLERANCE = 5.0         # K, tolerance for temperature match to target
-EQUILIBRIUM_TOLERANCE = 1.0  # K, tolerance for base temp equilibrium detection
+EQUILIBRIUM_TOLERANCE = 10.0  # K, tolerance for base temp equilibrium detection
 
 # =============================================================================
 # Material Options
