@@ -14,12 +14,17 @@ ANODE_THICKNESS = 20e-6  # Default anode thickness in meters (20 μm)
 # Beam Parameters
 # =============================================================================
 # Beam spot size (σ values, FWHM ≈ 2.355 × σ)
-BEAM_SIGMA_X = 29.7e-6  # m (FWHM = 70μm -> σ = 70/2.355 ≈ 29.7μm)
-BEAM_SIGMA_Y = 297e-6   # m (FWHM = 700μm -> σ = 700/2.355 ≈ 297μm)
+FWHM_TO_SIGMA = 1/1.82 # For n=4 supergaussian
+BEAM_FWHM_X = 70e-6 # m
+BEAM_FWHM_Y = 700e-6 # m
+BEAM_SIGMA_X = FWHM_X * FWHM_TO_SIGMA  # m (FWHM = 70μm -> σ = 70/2.355 ≈ 29.7μm)
+BEAM_SIGMA_Y = FWHM_Y * FWHM_TO_SIGMA   # m (FWHM = 700μm -> σ = 700/2.355 ≈ 297μm)
 
 # Track parameters
 TRACK_LENGTH = 3e-3  # m (L = 3mm)
 PERIOD = 1e-3        # s (rotation period = 1ms)
+RPM = 6000
+TARGET_RADIUS = 0.05
 
 # Beam motion: velocity derived from track length and period
 # During beam-on, beam moves from -L/2 to L/2
@@ -48,14 +53,14 @@ T_MELTING = {        # Melting points in K
 N_PERIODS_MIN = 10           # Minimum periods to run for equilibrium
 N_PERIODS_MAX = 100          # Maximum periods before giving up
 DT_BEAM_ON = 1e-6            # Time step during beam-on (1 μs)
-DT_BEAM_OFF = 10e-6          # Time step during beam-off (10 μs)
+DT_BEAM_OFF = 100e-6          # Time step during beam-off (10 μs)
 
 # =============================================================================
 # Optimization Parameters
 # =============================================================================
 POWER_INITIAL = 100.0        # Initial power guess in Watts
 POWER_MIN = 1.0              # Minimum power to search
-POWER_MAX = 10000.0          # Maximum power to search
+POWER_MAX = 2000.0          # Maximum power to search
 POWER_TOLERANCE = 0.01       # Relative tolerance for power convergence
 TEMP_TOLERANCE = 5.0         # K, tolerance for temperature match to target
 EQUILIBRIUM_TOLERANCE = 1.0  # K, tolerance for base temp equilibrium detection
