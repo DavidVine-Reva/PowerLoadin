@@ -23,12 +23,11 @@ BEAM_SIGMA_Y = FWHM_Y * FWHM_TO_SIGMA   # m (FWHM = 700μm -> σ = 700/2.355 ≈
 # Track parameters
 TRACK_LENGTH = 3e-3  # m (L = 3mm)
 PERIOD = 1e-3        # s (rotation period = 1ms)
-RPM = 6000
-TARGET_RADIUS = 0.05
+VELOCITY = 100.0     # m/s
 
-# Beam motion: velocity derived from track length and period
-# During beam-on, beam moves from -L/2 to L/2
-# v = L / t_on, where t_on is calculated from desired duty cycle or given directly
+# Beam motion: velocity is fixed at 100 m/s
+# During beam-on, beam moves linear distance L at velocity v
+# t_on = L / v
 
 # Default voltage for Gruen function
 DEFAULT_VOLTAGE_KV = 100  # kV

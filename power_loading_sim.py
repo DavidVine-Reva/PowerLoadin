@@ -37,7 +37,7 @@ from config import (
     SUBSTRATE_SIZE, ANODE_THICKNESS, BEAM_SIGMA_X, BEAM_SIGMA_Y,
     TRACK_LENGTH, PERIOD, T_TARGET, T_AMBIENT, DEFAULT_VOLTAGE_KV,
     N_PERIODS_MIN, N_PERIODS_MAX, DT_BEAM_ON, DT_BEAM_OFF,
-    MODEL_NAME
+    MODEL_NAME, VELOCITY, EQUILIBRIUM_TOLERANCE
 )
 from materials import get_material_properties, get_comsol_material_definition
 from gruen_function import gruen_range, get_simple_depth_expression
@@ -76,20 +76,14 @@ class RotatingAnodeSimulation:
         self.power = power
         
         # Calculate derived parameters
-        self.beam_on_time = TRACK_LENGTH / self._calculate_velocity()
+        # Calculate derived parameters
+        self.beam_on_time = TRACK_LENGTH / VELOCITY
         
         # COMSOL objects
         self.client = None
         self.model = None
         self.java = None
-        
-    def _calculate_velocity(self) -> float:
-        """Calculate beam velocity from track length and desired duty cycle."""
-        # Assuming ~10% duty cycle (beam on for 10% of period)
-        # Adjust this based on actual rotation speed
-        duty_cycle = 0.1
-        t_on = PERIOD * duty_cycle
-        return TRACK_LENGTH / t_on
+
     
     def connect(self):
         """Connect to COMSOL server."""
@@ -136,7 +130,7 @@ class RotatingAnodeSimulation:
         
         # Calculate and set derived parameters
         t_on = self.beam_on_time
-        velocity = TRACK_LENGTH / t_on
+        velocity = VELOCITY
         params.set("t_on", f"{t_on}[s]", "Beam on time per period")
         params.set("v_beam", f"{velocity}[m/s]", "Beam velocity")
         
@@ -287,9 +281,19 @@ class RotatingAnodeSimulation:
         t_mod = "mod(t, T_period)"
         
         # Beam x position (linear motion during beam-on time)
-        # During beam-on, beam moves from -L_track/2 to +L_track/2
-        # Use beam_state to freeze position when beam is off
-        x_beam = f"(-L_track/2 + ({t_mod}/t_on)*L_track)"
+        # During beam-on, beam moves linear distance at velocity v
+        # Center of pulse is at t=0 (and period increments)
+        # We need x_beam to track from -L/2 to L/2 as t goes from -0.5*t_on to +0.5*t_on
+        # x_beam(t) = v * (t_mod) where t_mod is centered relative to pulse
+        
+        # Use discrete beam_state to control heat ON/OFF.
+        # Position resets at specific times.
+        # Let's use a continuous expression for position based on simulation time t:
+        # x_beam = v_beam * (t - floor(t/T_period + 0.5) * T_period)
+        # This creates a sawtooth that resets at T/2, 3T/2, ensuring 0 at 0, T, 2T.
+        
+        term_floor = f"floor(t/T_period + 0.5)"
+        x_beam = f"v_beam * (t - {term_floor}*T_period)"
         
         # 2D Gaussian in x and y
         # G_xy = (1 / (2*pi*sigma_x*sigma_y)) * exp(-((x-x_beam)^2/(2*sigma_x^2) + y^2/(2*sigma_y^2)))
@@ -416,57 +420,100 @@ class RotatingAnodeSimulation:
         print(f"      Beam off time: {(t_period - t_on)*1e6:.1f} μs")
         print(f"      Number of periods: {n_periods}")
         
-        # Create explicit events for beam on and beam off times
-        # Following the pattern from run_50cycles_and_check.py
+        # Create explicit events for beam on/off transitions
+        # Logic:
+        # Beam is ON around t=k*T.
+        # OFF at t = k*T + 0.5*t_on
+        # ON at t = (k+1)*T - 0.5*t_on
+        
         event_num = 1
         
         for n in range(n_periods):
-            t_beam_off = n * t_period + t_on
-            t_beam_on_next = (n + 1) * t_period
+            t_center = n * t_period
+            t_off = t_center + 0.5 * t_on
             
-            # Beam OFF event
-            print(f"      Event {event_num}: beam OFF at t={t_beam_off*1e6:.2f} μs")
-            tag_off = f"expl{event_num}"
-            ev.feature().create(tag_off, "ExplicitEvent")
-            f_off = ev.feature(tag_off)
-            f_off.set("start", f"{t_beam_off:.9g}")
-            f_off.set("reInitName", "beam_state")
-            f_off.set("reInitValue", "0")
-            event_num += 1
+            # For n=0, we start ON, so first event is OFF at 0.5*t_on
+            if t_off < (n_periods * t_period):
+                print(f"      Event {event_num}: beam OFF at t={t_off*1e6:.2f} μs")
+                tag_off = f"expl_off_{n}"
+                ev.feature().create(tag_off, "ExplicitEvent")
+                f_off = ev.feature(tag_off)
+                f_off.set("start", f"{t_off:.9g}")
+                f_off.set("reInitName", "beam_state")
+                f_off.set("reInitValue", "0")
+                event_num += 1
             
-            # Beam ON event (except after last cycle)
-            if n < n_periods - 1:
-                print(f"      Event {event_num}: beam ON at t={t_beam_on_next*1e6:.2f} μs")
-                tag_on = f"expl{event_num}"
+            # Next ON event: approach next period center
+            t_next_center = (n + 1) * t_period
+            t_next_on = t_next_center - 0.5 * t_on
+            
+            if t_next_on < (n_periods * t_period):
+                print(f"      Event {event_num}: beam ON at t={t_next_on*1e6:.2f} μs")
+                tag_on = f"expl_on_{n}"
                 ev.feature().create(tag_on, "ExplicitEvent")
                 f_on = ev.feature(tag_on)
-                f_on.set("start", f"{t_beam_on_next:.9g}")
+                f_on.set("start", f"{t_next_on:.9g}")
                 f_on.set("reInitName", "beam_state")
                 f_on.set("reInitValue", "1")
                 event_num += 1
         
         print(f"    Created {event_num - 1} events")
         
-        # Generate output times using range() syntax like the example
-        # During beam-on: fine time steps, during beam-off: coarser steps
-        dt_on = max(t_on / 20.0, 1e-9)  # Fine steps during beam-on
-        dt_off = max((t_period - t_on) / 10.0, 1e-9)  # Coarser during cooling
+        # Generate output times
+        # During beam-on: fine time steps
+        # During beam-off: coarser steps
+        # Beam is ON in [k*T - 0.5*t_on, k*T + 0.5*t_on]
+        # We simulate from t=0. At t=0, we are in middle of ON pulse (from -0.5*t_on to 0.5*t_on)? 
+        # Wait, problem: user says "time 0, period, 2*period" beam is at 0,0.
+        # This implies at t=0, beam is ON and at center.
+        # So Interval 0: [0, 0.5*t_on] (ON) -> [0.5*t_on, T - 0.5*t_on] (OFF) -> [T - 0.5*t_on, T] (ON) ...
+        
+        dt_on = max(t_on / 20.0, 1e-9)
+        dt_off = max((t_period - t_on) / 10.0, 1e-9)
         
         parts = []
-        for n in range(n_periods):
-            t0 = n * t_period
-            t_on_end = t0 + t_on
-            t1 = (n + 1) * t_period
-            
-            if t_on > 0:
-                parts.append(f"range({t0:.9g},{dt_on:.9g},{t_on_end:.9g})")
-            if (t_period - t_on) > 0:
-                parts.append(f"range({t_on_end:.9g},{dt_off:.9g},{t1:.9g})")
+        # Initial segment t=0 to 0.5*t_on
+        parts.append(f"range(0,{dt_on:.9g},{0.5*t_on:.9g})")
         
+        # Re-construct ranges properly
+        # Period n: starts at n*T.
+        #   Segment 1: n*T to n*T + 0.5*t_on (ON, exiting center)
+        #   Segment 2: n*T + 0.5*t_on to (n+1)*T - 0.5*t_on (OFF)
+        #   Segment 3: (n+1)*T - 0.5*t_on to (n+1)*T (ON, entering center)
+        
+        for n in range(n_periods):
+            t_start = n * t_period
+            t_mid_off = t_start + 0.5 * t_on
+            t_mid_on = (n + 1) * t_period - 0.5 * t_on
+            t_end = (n + 1) * t_period
+            
+            # Segment 1 (ON) - skip for n=0 as we covered start
+            if n > 0:
+                 parts.append(f"range({t_start:.9g},{dt_on:.9g},{t_mid_off:.9g})")
+            else:
+                 # for n=0, start=0, already covered [0, 0.5*ton]
+                 # But range is inclusive, so we might duplicate 0? No, range is fine.
+                 # Let's just be clean.
+                 pass
+
+        parts = []
+        for n in range(n_periods):
+            t_start = n * t_period
+            t_mid_off = t_start + 0.5 * t_on
+            t_mid_on = (n + 1) * t_period - 0.5 * t_on
+            t_end = (n + 1) * t_period
+            
+            # Segment 1 (ON): start to mid_off
+            parts.append(f"range({t_start:.9g},{dt_on:.9g},{t_mid_off:.9g})")
+            # Segment 2 (OFF): mid_off to mid_on
+            parts.append(f"range({t_mid_off:.9g},{dt_off:.9g},{t_mid_on:.9g})")
+            # Segment 3 (ON): mid_on to end
+            parts.append(f"range({t_mid_on:.9g},{dt_on:.9g},{t_end:.9g})")
+
         tlist_str = " ".join(parts)
         sol.feature("t1").set("tlist", tlist_str)
         
-        print(f"    Time stepping: {n_periods} periods")
+        print(f"    Time stepping configured for {n_periods} periods")
         print(f"    dt_on = {dt_on*1e9:.1f} ns, dt_off = {dt_off*1e6:.2f} μs")
         print(f"    Total simulation time: {n_periods * t_period * 1e3:.2f} ms")
         
@@ -578,6 +625,64 @@ class RotatingAnodeSimulation:
             print("COMSOL client closed.")
 
 
+
+    def check_equilibrium(self, times: np.ndarray, T_max_history: np.ndarray) -> bool:
+        """
+        Check if thermal equilibrium has been reached.
+        Condition: Max temperature is stable over 5 periods. 
+        We look at the peak temperature of the last 5 periods.
+        """
+        if len(times) == 0 or len(T_max_history) == 0:
+            return False
+            
+        # Identify peaks
+        # Simple approach: find max T in each period
+        periods = []
+        period_peaks = []
+        
+        t_period = PERIOD
+        t_max = times[-1]
+        n_periods = int(t_max / t_period)
+        
+        if n_periods < 5:
+            print("  Not enough periods to check equilibrium (< 5).")
+            return False
+            
+        for n in range(n_periods):
+            # Time window for period n
+            t_start = n * t_period
+            t_end = (n + 1) * t_period
+            
+            # Indices in this window
+            indices = np.where((times >= t_start) & (times < t_end))[0]
+            if len(indices) > 0:
+                T_local = T_max_history[indices]
+                period_peaks.append(np.max(T_local))
+            else:
+                period_peaks.append(0) # Should not happen if sampling is fine
+        
+        if len(period_peaks) < 5:
+            return False
+            
+        last_5 = np.array(period_peaks[-5:])
+        mean_peak = np.mean(last_5)
+        # Check standard deviation or max difference
+        # User defined EQUILIBRIUM_TOLERANCE in config (e.g. 1.0 K)
+        
+        # Check if all last 5 peaks are within tolerance of each other
+        peak_range = np.max(last_5) - np.min(last_5)
+        
+        print(f"  Equilibrium check (last 5 peaks): {last_5}")
+        print(f"  Range: {peak_range:.2f} K (Tolerance: {EQUILIBRIUM_TOLERANCE} K)")
+        
+        if peak_range < EQUILIBRIUM_TOLERANCE:
+            print("  Equilibrium REACHED.")
+            return True
+        else:
+            print("  Equilibrium NOT reached.")
+            return False
+
+
 def run_single_simulation(
     anode_material: str = 'Mo',
     anode_thickness: float = ANODE_THICKNESS,
@@ -626,6 +731,12 @@ def run_single_simulation(
             
         sim.solve()
         results = sim.get_results()
+        
+        # Check equilibrium
+        if results:
+            is_equil = sim.check_equilibrium(results.get('times', []), results.get('T_max_history', []))
+            results['equilibrium_reached'] = is_equil
+            
         return results
         
     finally:
@@ -672,17 +783,6 @@ def plot_temperature_history(results: Dict[str, Any], filename: str = None) -> N
     ax.grid(True, alpha=0.3)
     
     # Add beam on/off shading
-    from config import PERIOD, RPM, TARGET_RADIUS
-    omega = 2 * np.pi * RPM / 60
-    beam_on_time = 2 * np.arcsin(0.5e-3 / TARGET_RADIUS) / omega  # ~1 mm track width
-    
-    n_periods = int(times_us[-1] / (PERIOD * 1e6)) + 1
-    for n in range(n_periods):
-        t_start = n * PERIOD * 1e6
-        t_on_end = t_start + beam_on_time * 1e6
-        ax.axvspan(t_start, t_on_end, alpha=0.15, color='red', 
-                   label='Beam ON' if n == 0 else None)
-    
     ax.legend(loc='upper right')
     
     # Add info text
@@ -770,6 +870,12 @@ def main():
         # Save CSV
         csv_filename = f"{args.output_prefix}_{args.anode_material}_{int(args.anode_thickness)}um.csv"
         save_results_csv(results, csv_filename)
+        
+        # Report equilibrium
+        if results.get('equilibrium_reached'):
+            print(">> THERMAL EQUILIBRIUM ACHIEVED <<")
+        else:
+            print(">> WARNING: Thermal equilibrium NOT achieved in simulated time <<")
         
         # Plot if matplotlib is available
         try:
