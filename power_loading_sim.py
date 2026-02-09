@@ -40,7 +40,12 @@ from config import (
     MODEL_NAME, VELOCITY, EQUILIBRIUM_TOLERANCE
 )
 from materials import get_material_properties, get_comsol_material_definition
+from materials import get_material_properties, get_comsol_material_definition
 from gruen_function import gruen_range, get_simple_depth_expression
+try:
+    from fit_loader import get_fit_params
+except ImportError:
+    get_fit_params = None
 
 
 class RotatingAnodeSimulation:
@@ -138,12 +143,35 @@ class RotatingAnodeSimulation:
         params.set("P0", f"{self.power}[W]", "Total beam power")
         params.set("T_ambient", f"{T_AMBIENT}[K]", "Ambient temperature")
         
-        # Gruen function parameters
-        gruen_params = get_simple_depth_expression(self.voltage_kV, self.anode_material)
-        params.set("z_peak", f"{gruen_params['z_peak']}[m]", "Gruen peak depth")
-        params.set("sigma_z", f"{gruen_params['sigma_z']}[m]", "Gruen depth sigma")
-        params.set("R_gruen", f"{gruen_params['R_gruen']}[m]", "Gruen range")
-        params.set("norm_z", f"{gruen_params['norm_z']}[1/m]", "Depth normalization")
+        # Gruen function / Fit parameters
+        # If material is Mo and fit loader available, use fit parameters
+        # Else use default Gruen approximation
+        use_fit = (self.anode_material == 'Mo') and (get_fit_params is not None)
+        
+        if use_fit:
+            print(f"  Using FIT parameters for {self.anode_material} at {self.voltage_kV} kV")
+            alpha_m, beta, norm_fit = get_fit_params(self.voltage_kV)
+            
+            # For compatibility with expression builder, we map to generic names or use new ones
+            # Let's use specific names for Modified Gruen
+            params.set("alpha_z", f"{alpha_m:.6e}[m]", "Modified Gruen alpha")
+            params.set("beta_z", f"{beta:.6f}", "Modified Gruen beta")
+            params.set("norm_z", f"{norm_fit:.6e}[1/m]", "Depth normalization")
+            
+            # Also set R_gruen for cut-off (still useful, though exponential decays fast)
+            # Use specific Gruen range or just a large enough multiple of alpha
+            # R_gruen ≈ range where beam stops. For Modified Gruen, decay is exp(-z/alpha)
+            # 10*alpha is sufficient for cutoff
+            params.set("R_gruen", f"{10*alpha_m:.6e}[m]", "Effective range cutoff")
+            params.set("use_modified_gruen", "1", "Flag for Modified Gruen profile")
+        else:
+            print(f"  Using STANDARD Gruen parameters for {self.anode_material}")
+            gruen_params = get_simple_depth_expression(self.voltage_kV, self.anode_material)
+            params.set("z_peak", f"{gruen_params['z_peak']}[m]", "Gruen peak depth")
+            params.set("sigma_z", f"{gruen_params['sigma_z']}[m]", "Gruen depth sigma")
+            params.set("R_gruen", f"{gruen_params['R_gruen']}[m]", "Gruen range")
+            params.set("norm_z", f"{gruen_params['norm_z']}[1/m]", "Depth normalization")
+            params.set("use_modified_gruen", "0", "Flag for Modified Gruen profile")
         
     def _create_geometry(self) -> None:
         """Create 3D geometry: substrate + anode + beam track region."""
@@ -303,12 +331,27 @@ class RotatingAnodeSimulation:
         # Depth from anode surface (z=0 at bottom, so anode top is at H_sub + t_anode)
         z_local = "(H_sub + t_anode - z)"
         
-        # Gruen depth profile (from parameters defined earlier)
-        gauss_z = f"norm_z*({z_local}/z_peak)*exp(-(({z_local}-z_peak)^2)/(2*sigma_z^2))"
+        # Depth profile
+        # Note: z_local is distance INTO material from surface
+        
+        # We support both Standard Gruen (Gaussian-like) and Modified Gruen (from fit)
+        # using a conditional expression based on 'use_modified_gruen' parameter
+        
+        # Standard Gruen: (z/z_peak) * exp(-(z-z_peak)^2 / 2sigma^2)
+        gauss_z_std = "norm_z*(z_local/z_peak)*exp(-((z_local-z_peak)^2)/(2*sigma_z^2))"
+        
+        # Modified Gruen: (z/alpha)^beta * exp(-z/alpha)
+        # Note: COMSOL power operator is ^
+        gauss_z_mod = "norm_z*(z_local/alpha_z)^beta_z*exp(-z_local/alpha_z)"
+        
+        # Select based on flag
+        # If use_modified_gruen is 1, use mod, else std
+        # Using no-if syntax for robustness: (flag)*mod + (1-flag)*std
+        gauss_z = f"((use_modified_gruen)*({gauss_z_mod}) + (1-use_modified_gruen)*({gauss_z_std}))"
+        
         valid_z = f"(({z_local} > 0) * ({z_local} < R_gruen))"
         
         # Complete heat source expression using beam_state discrete variable
-        # beam_state is controlled by events (1=on, 0=off)
         Q_expr = f"P0 * {gauss_xy} * {gauss_z} * {valid_z} * beam_state"
         
         return Q_expr

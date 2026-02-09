@@ -17,8 +17,8 @@ ANODE_THICKNESS = 20e-6  # Default anode thickness in meters (20 μm)
 FWHM_TO_SIGMA = 1/1.82 # For n=4 supergaussian
 BEAM_FWHM_X = 70e-6 # m
 BEAM_FWHM_Y = 700e-6 # m
-BEAM_SIGMA_X = FWHM_X * FWHM_TO_SIGMA  # m (FWHM = 70μm -> σ = 70/2.355 ≈ 29.7μm)
-BEAM_SIGMA_Y = FWHM_Y * FWHM_TO_SIGMA   # m (FWHM = 700μm -> σ = 700/2.355 ≈ 297μm)
+BEAM_SIGMA_X = BEAM_FWHM_X * FWHM_TO_SIGMA
+BEAM_SIGMA_Y = BEAM_FWHM_Y * FWHM_TO_SIGMA
 
 # Track parameters
 TRACK_LENGTH = 3e-3  # m (L = 3mm)
