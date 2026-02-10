@@ -13,12 +13,19 @@ ANODE_THICKNESS = 20e-6  # Default anode thickness in meters (20 μm)
 # =============================================================================
 # Beam Parameters
 # =============================================================================
-# Beam spot size (σ values, FWHM ≈ 2.355 × σ)
-FWHM_TO_SIGMA = 1/1.82 # For n=4 supergaussian
+# Beam spot size (σ values for super-Gaussian order 4)
+# For super-Gaussian exp(-(|x|/σ)^n), FWHM = 2σ(ln2)^(1/n)
+# For n=4: FWHM = 2σ(ln2)^(1/4) ≈ 1.8260σ, so σ = FWHM/1.8260
+SUPERGAUSS_ORDER = 4
+FWHM_TO_SIGMA = 1/1.8260  # For n=4 super-Gaussian
 BEAM_FWHM_X = 70e-6 # m
 BEAM_FWHM_Y = 700e-6 # m
 BEAM_SIGMA_X = BEAM_FWHM_X * FWHM_TO_SIGMA
 BEAM_SIGMA_Y = BEAM_FWHM_Y * FWHM_TO_SIGMA
+
+# Beam track region extends this many σ beyond beam range (each side)
+# For super-Gaussian order 4, amplitude at 2.5σ = exp(-2.5^4) ≈ 10^-17
+BEAM_TRACK_NSIGMA = 2.5
 
 # Track parameters
 TRACK_LENGTH = 3e-3  # m (L = 3mm)
@@ -52,7 +59,7 @@ T_MELTING = {        # Melting points in K
 N_PERIODS_MIN = 50           # Minimum periods to run for equilibrium
 N_PERIODS_MAX = 100          # Maximum periods before giving up
 DT_BEAM_ON = 1e-6            # Time step during beam-on (1 μs)
-DT_BEAM_OFF = 100e-6          # Time step during beam-off (10 μs)
+DT_BEAM_OFF = 100e-6          # Time step during beam-off (100 μs)
 
 # =============================================================================
 # Optimization Parameters
